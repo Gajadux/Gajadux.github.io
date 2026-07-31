@@ -41,7 +41,6 @@ function formatToday(){
 
 // Start
 startBtn.addEventListener('click', () => {
-  // elegant entrance: fade start away and show unlock
   startScreen.style.transform = 'translate(-50%,-60%) scale(.98)';
   startScreen.style.opacity = '0';
   setTimeout(()=> {
@@ -69,112 +68,74 @@ function tryUnlock(){
   } else {
     feedbackEl.textContent = "Incorrect — try again.";
     if(attempts >= MAX_ATTEMPTS_BEFORE_HINT){
-      // show hint: today's date
       hintEl.textContent = `Hint: Today's date is ${formatToday()}`;
       hintEl.classList.remove('hidden');
       requestAnimationFrame(()=> hintEl.classList.add('revealed'));
     }
-    // small shake
+    // subtle motion
     unlockPanel.animate([
       { transform: 'translateY(0)' },
-      { transform: 'translateY(-6px)' },
+      { transform: 'translateY(-8px)' },
       { transform: 'translateY(0)' }
-    ], { duration: 300, easing: 'cubic-bezier(.2,.9,.3,1)'});
+    ], { duration: 320, easing: 'cubic-bezier(.2,.9,.3,1)'});
   }
 }
 
-// Celebratory animation
+// Celebratory animation (DOF zoom, no letter typing for header)
 async function successUnlock(){
   feedbackEl.textContent = '';
-  hintEl.classList.remove('revealed');
   hide(unlockPanel);
 
-  // subtle stage zoom
-  stage.animate([
-    { transform: 'scale(1)' },
-    { transform: 'scale(1.04)' },
-    { transform: 'scale(1)' }
-  ], { duration: 1200, easing: 'cubic-bezier(.2,.9,.3,1)' });
+  // stage DOF: blur and dim the background panels
+  stage.classList.add('dof');
 
   // show celebration panel
   show(celebration);
 
-  // Animate header in: zoom+type
-  await animateHeader("HAPPY BIRTHDAY MY ANGELINA");
+  // set header text (already in HTML) and animate zoom
+  hbHead.classList.remove('zoomed');
+  hbHead.style.transform = 'scale(.86)';
+  hbHead.style.opacity = '0';
+  // small delay for dramatic timing
+  await wait(150);
 
-  // small pause
-  await wait(600);
-
-  // type message
-  await typeText(messageEl, birthdayMessage, 18);
+  // Animate header zoom-in (depth-of-field effect comes from .stage.dof in CSS)
+  hbHead.classList.add('zoomed');
+  // Make message appear instantly but with soft reveal (no letter-by-letter)
+  messageEl.textContent = birthdayMessage;
+  await wait(400);
+  messageEl.classList.add('visible');
 
   // start confetti
   startConfetti();
 
   // show replay
   replayBtn.classList.remove('hidden');
-  setTimeout(()=> replayBtn.classList.add('revealed'), 100);
+  setTimeout(()=> replayBtn.classList.add('revealed'), 140);
 }
 
 // simple wait helper
 function wait(ms){ return new Promise(res => setTimeout(res, ms)); }
 
-// header animation: letter-by-letter reveal with scale
-async function animateHeader(text){
-  hbHead.textContent = '';
-  // reveal letters with slight stagger
-  for(let i=0;i<text.length;i++){
-    hbHead.textContent += text[i];
-    hbHead.style.transform = `scale(${1.02 + Math.sin(i)*0.003})`;
-    await wait(34 + (i%6)*12);
-  }
-  // final punch
-  hbHead.animate([
-    { transform: 'scale(.96)', opacity:0.92 },
-    { transform: 'scale(1.06)', opacity:1 },
-    { transform: 'scale(1)' }
-  ], { duration: 700, easing: 'cubic-bezier(.2,.9,.3,1)'});
-}
-
-// typing effect (supports emojis & unicode)
-function typeText(el, text, speed=20){
-  return new Promise(resolve => {
-    el.textContent = '';
-    let i=0;
-    function step(){
-      // handle multi-codepoint characters by using Array.from
-      const arr = Array.from(text);
-      if(i < arr.length){
-        el.textContent += arr[i];
-        i++;
-        // small variance in speed
-        setTimeout(step, speed + Math.random()*20);
-      } else {
-        resolve();
-      }
-    }
-    step();
-  });
-}
-
 // replay handler
 replayBtn.addEventListener('click', () => {
-  // reset states
   attempts = 0;
   codeInput.value = '';
   hintEl.textContent = '';
   feedbackEl.textContent = '';
   messageEl.textContent = '';
-  hbHead.textContent = '';
+  messageEl.classList.remove('visible');
+  hbHead.classList.remove('zoomed');
   hide(celebration);
   confettiCanvas.classList.add('hidden');
   stopConfetti();
+  stage.classList.remove('dof');
   // show unlock again
   show(unlockPanel);
   codeInput.focus();
 });
 
-/* --- simple confetti implementation --- */
+/* --- confetti (kept lightweight) --- */
 let confettiCtx, confettiEls = [], confettiRAF, confettiRunning=false;
 
 function startConfetti(){
@@ -200,14 +161,14 @@ function createConfetti(count){
     arr.push({
       x: Math.random()*innerWidth,
       y: Math.random()*-innerHeight,
-      w: 6 + Math.random()*10,
-      h: 8 + Math.random()*12,
-      vx: (Math.random()-0.5)*1.8,
+      w: 6 + Math.random()*12,
+      h: 8 + Math.random()*14,
+      vx: (Math.random()-0.5)*2.0,
       vy: 2 + Math.random()*3.5,
       rot: Math.random()*360,
       vrot: (Math.random()-0.5)*6,
       color: colors[Math.floor(Math.random()*colors.length)],
-      drift: Math.random()*0.6
+      drift: Math.random()*0.8
     });
   }
   return arr;
@@ -227,8 +188,7 @@ function renderConfetti(){
     confettiCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
     confettiCtx.restore();
 
-    if(p.y > confettiCanvas.height + 50){
-      // recycle
+    if(p.y > confettiCanvas.height + 60){
       p.x = Math.random()*confettiCanvas.width;
       p.y = -20 - Math.random()*200;
       p.vy = 2 + Math.random()*3.5;
@@ -237,7 +197,6 @@ function renderConfetti(){
   confettiRAF = requestAnimationFrame(renderConfetti);
 }
 
-// make canvas responsive
 window.addEventListener('resize', () => {
   if(confettiCanvas && !confettiCanvas.classList.contains('hidden')){
     confettiCanvas.width = innerWidth;
