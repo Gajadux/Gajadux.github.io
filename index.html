@@ -6,45 +6,718 @@
   <title>Happy Birthday — Surprise</title>
 
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Great+Vibes&family=Playfair+Display:wght@600;700;900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* -------------------------
+       Design tokens & reset
+       ------------------------- */
+    :root{
+      --bg-1: #05060a;
+      --bg-2: #0b1014;
+      --accent-a: #ff6fa6;
+      --accent-b: #66d9ff;
+      --glass-edge: rgba(255,255,255,0.08);
+      --glass-sheen: rgba(255,255,255,0.035);
+      --muted: rgba(255,255,255,0.66);
+      --radius: 20px;
+      --soft-radius: 28px;
+      --ease: cubic-bezier(.18,.9,.32,1);
+      --max-width: 980px;
+      --glass-blur: 14px;
+      --text-glow: 0 10px 40px rgba(255,110,160,0.18), 0 2px 8px rgba(0,0,0,0.6);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      background:
+        radial-gradient(500px 300px at 8% 12%, rgba(102,217,255,0.03), transparent 12%),
+        radial-gradient(600px 360px at 28% 78%, rgba(255,123,176,0.03), transparent 12%),
+        radial-gradient(420px 280px at 78% 28%, rgba(180,120,255,0.02), transparent 12%),
+        linear-gradient(180deg,var(--bg-1),var(--bg-2));
+      color:#fff;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      padding:28px;
+    }
+
+    /* -------------------------
+       Particle canvas sits beneath everything
+       ------------------------- */
+    #particle-wrap{
+      position:fixed; inset:0; z-index:0; pointer-events:none;
+    }
+
+    /* -------------------------
+       Center stage and glass container
+       ------------------------- */
+    .stage{
+      position:relative;
+      width:min(96%, var(--max-width));
+      max-width:var(--max-width);
+      z-index:6;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:420px;
+      height: min(78vh, 820px);
+      transition: transform 820ms var(--ease);
+    }
+
+    /* large glass card */
+    .glass-card{
+      position:relative;
+      width:100%;
+      height:100%;
+      border-radius:calc(var(--radius) + 6px);
+      padding:36px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border:1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(var(--glass-blur)) saturate(130%);
+      box-shadow: 0 30px 90px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      overflow:visible;
+    }
+
+    /* sheen & inner glow pseudo layers */
+    .glass-card::before,
+    .glass-card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      pointer-events:none;
+    }
+    .glass-card::before{
+      /* soft inner highlight */
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.0));
+      mix-blend-mode: overlay;
+      filter: blur(6px);
+    }
+    .glass-card::after{
+      /* subtle edge */
+      border-radius:inherit;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 1px 0 rgba(0,0,0,0.35);
+      opacity:0.8;
+    }
+
+    /* -------------------------
+       Top area / start button
+       ------------------------- */
+    .start-area{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      width:100%;
+      z-index:4;
+    }
+
+    .start-btn{
+      font-family:"Great Vibes", serif;
+      font-size:54px;
+      line-height:1;
+      padding:12px 46px;
+      border-radius:999px;
+      background: linear-gradient(120deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.06);
+      color:#fff;
+      cursor:pointer;
+      box-shadow: 0 14px 50px rgba(102,31,63,0.12);
+      transform-origin:center;
+      transition: transform 320ms var(--ease), box-shadow 320ms var(--ease);
+      backdrop-filter: blur(6px);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .start-btn:hover{ transform: translateY(-6px) scale(1.02); box-shadow: 0 26px 80px rgba(102,31,63,0.18); }
+    .start-sub{ color:var(--muted); font-size:13px; }
+
+    /* -------------------------
+       Unlock panel
+       ------------------------- */
+    .unlock{
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
+      z-index:5;
+    }
+    .lead{ font-size:18px; font-weight:600; letter-spacing:0.01em; }
+    .desc{ color:var(--muted); font-size:13px; text-align:center; max-width:760px; }
+
+    .input-row{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-top:6px;
+    }
+
+    /* liquid glass input group */
+    .code-input{
+      width:170px;
+      padding:14px 18px;
+      border-radius:14px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      color:#fff;
+      font-size:20px;
+      text-align:center;
+      outline:none;
+      box-shadow: inset 0 3px 10px rgba(0,0,0,0.25), 0 6px 22px rgba(2,6,23,0.45);
+      transition: transform 260ms var(--ease), box-shadow 260ms var(--ease), background 220ms var(--ease);
+      backdrop-filter: blur(8px);
+    }
+    .code-input:focus{ transform: translateY(-4px); box-shadow: inset 0 6px 18px rgba(0,0,0,0.4), 0 14px 40px rgba(2,6,23,0.55); }
+
+    /* super glass unlock button (liquid) */
+    .unlock-btn{
+      --btn-h:48px;
+      height:var(--btn-h);
+      padding:0 18px;
+      border-radius:14px;
+      border: none;
+      cursor:pointer;
+      font-weight:700;
+      color:#081018;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02)),
+        linear-gradient(90deg, var(--accent-a), var(--accent-b));
+      box-shadow: 0 10px 30px rgba(102,31,63,0.12), inset 0 1px 0 rgba(255,255,255,0.18);
+      transform-origin:center;
+      transition: transform 220ms var(--ease), box-shadow 220ms var(--ease), filter 220ms var(--ease);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      backdrop-filter: blur(8px);
+    }
+    .unlock-btn:hover{ transform: translateY(-3px) scale(1.02); box-shadow: 0 20px 60px rgba(102,31,63,0.18); filter: saturate(1.05); }
+
+    .hint{ color: rgba(255,255,255,0.95); font-weight:600; margin-top:8px; }
+    .feedback{ color:#ffb3c9; margin-top:6px; min-height:20px; }
+
+    /* -------------------------
+       Celebration area (centered)
+       ------------------------- */
+    .celebration{
+      position:absolute;
+      inset:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      padding:28px;
+      pointer-events:none;
+      z-index:12;
+    }
+
+    .hb{
+      font-family: 'Playfair Display', serif;
+      font-weight:700;
+      font-size: clamp(40px, 8vw, 92px);
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      color: #fff;
+      text-align:center;
+      opacity:0;
+      transform: translateZ(0) scale(.92);
+      transition: transform 900ms var(--ease), opacity 600ms var(--ease), filter 900ms var(--ease);
+      filter: drop-shadow(0 24px 60px rgba(0,0,0,0.6));
+      will-change: transform, opacity, filter;
+    }
+    .hb.glow{
+      opacity:1;
+      transform: scale(1.18);
+      text-shadow:
+        0 10px 30px rgba(255,110,160,0.18),
+        0 2px 8px rgba(255,160,200,0.12);
+      filter: blur(0px) drop-shadow(0 30px 90px rgba(255,110,160,0.12));
+      pointer-events:none;
+    }
+
+    .message{
+      width:min(92%,820px);
+      max-width:920px;
+      color:rgba(255,255,255,0.96);
+      font-size:18px;
+      line-height:1.6;
+      text-align:center;
+      padding:20px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.04);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008));
+      backdrop-filter: blur(8px);
+      opacity:0;
+      transform: translateY(8px) scale(.98);
+      transition: opacity 720ms var(--ease) 260ms, transform 720ms var(--ease) 260ms;
+      box-shadow: 0 18px 50px rgba(2,6,23,0.55);
+      pointer-events:none;
+    }
+    .message.visible{ opacity:1; transform: translateY(0) scale(1); pointer-events:auto; }
+
+    /* stage DOF: blur everything behind the celebration */
+    .dof .glass-card{ transform: scale(.996); filter: blur(8px) saturate(.9); opacity:0.42; pointer-events:none; transition: all 820ms var(--ease); }
+
+    /* small replay btn */
+    .replay{
+      margin-top:6px;
+      padding:10px 14px;
+      border-radius:12px;
+      border:none;
+      cursor:pointer;
+      background: rgba(255,255,255,0.03);
+      color:var(--muted);
+      transition: transform 220ms var(--ease);
+    }
+    .replay:hover{ transform: translateY(-3px); color:#fff; }
+
+    /* footer spacing on small devices */
+    @media (max-width:720px){
+      .glass-card{ padding:20px }
+      .hb{ font-size: clamp(28px, 11vw, 56px) }
+      .start-btn{ font-size:40px; padding:10px 28px }
+    }
+
+    /* reduced motion: respect user prefs */
+    @media (prefers-reduced-motion: reduce){
+      *{ transition:none !important; animation:none !important; scroll-behavior:auto !important; }
+    }
+  </style>
 </head>
 <body>
-  <div id="stage" class="stage">
-    <div class="bg-orbit"></div>
-    <div class="background-layer"></div>
 
-    <!-- Start screen -->
-    <div id="start-screen" class="centered glass-panel panel-start revealed">
-      <button id="start-btn" class="handwriting start-btn" aria-label="Start">Start</button>
-      <p class="subtle">Tap to begin</p>
-    </div>
-
-    <!-- Unlock panel -->
-    <div id="unlock-panel" class="centered glass-panel panel-unlock hidden" role="region" aria-live="polite">
-      <p class="lead">Today is someone's special day.</p>
-      <p class="muted">Type the correct 4-digit number to unlock a secret about them.</p>
-
-      <div class="code-row">
-        <input id="code-input" class="code-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="4 digit code" />
-        <button id="unlock-btn" class="btn">Unlock</button>
-      </div>
-
-      <p id="hint" class="hint hidden"></p>
-      <p id="feedback" class="feedback" aria-live="assertive"></p>
-    </div>
-
-    <!-- Celebration / result -->
-    <div id="celebration" class="centered celebration hidden" role="dialog" aria-modal="true">
-      <h1 id="hb-head" class="handwriting big-handwriting" aria-hidden="true">HAPPY BIRTHDAY MY ANGELINA</h1>
-      <div id="message" class="message readable" aria-live="polite"></div>
-      <button id="replay" class="btn subtle-btn hidden">Play again</button>
-    </div>
-
-    <canvas id="confetti-canvas" class="confetti-canvas hidden" aria-hidden="true"></canvas>
+  <!-- particle canvas (full bleed) -->
+  <div id="particle-wrap" aria-hidden="true">
+    <canvas id="particle-canvas"></canvas>
   </div>
 
-  <script src="script.js"></script>
+  <main class="stage" id="stage" role="main" aria-labelledby="page-title">
+    <section class="glass-card" role="region" aria-label="Birthday surprise card">
+
+      <div class="start-area" id="start-area">
+        <button id="start-btn" class="start-btn" aria-label="Start the surprise">Start</button>
+        <div class="start-sub">Tap to begin</div>
+      </div>
+
+      <div id="unlock-area" class="unlock" style="display:none;">
+        <div class="lead">Today is someone's special day.</div>
+        <div class="desc">Type the correct 4-digit number to unlock a secret about them.</div>
+
+        <div class="input-row" style="margin-top:14px;">
+          <input id="code-input" class="code-input" maxlength="4" inputmode="numeric" placeholder="____" aria-label="4 digit code" />
+          <button id="unlock-btn" class="unlock-btn" aria-label="Unlock code">Unlock</button>
+        </div>
+
+        <div id="hint" class="hint" style="display:none;"></div>
+        <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+      </div>
+
+      <!-- celebration overlay -->
+      <div id="celebration" class="celebration" aria-hidden="true" style="display:none;">
+        <h1 id="hb" class="hb">HAPPY BIRTHDAY MY ANGELINA</h1>
+        <div id="message" class="message" aria-live="polite"></div>
+        <button id="replay" class="replay" style="display:none;">Play again</button>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+  // -------------------------
+  // Config
+  // -------------------------
+  const CORRECT = "0820";
+  const MAX_ATTEMPTS_BEFORE_HINT = 1;
+  const birthdayMessage = `Happy birthday to my beautifully cute girl, Angelina 🥹❤️. I’m genuinely so grateful to have you in my life, and I hope you know how much you mean to me. You make me happy in ways you probably don’t even realize, and even through all our jokes, random conversations, teasing, and little moments together, you’ve become someone I care about so deeply. I love your personality and all the little things that make you uniquely you. You’re not just my girlfriend—you’re my favorite person, my comfort, and someone I always want by my side. I hope this new year of your life brings you nothing but happiness, peace, love, and everything your heart desires, because you truly deserve the world. I’m so proud of the woman you are, and I can’t wait to make even more memories with you. Happy birthday, my love. I love you so much, Angelinka, and I hope today makes you feel as special and appreciated as you make me feel every day ❤️🎂`;
+
+  // -------------------------
+  // DOM refs
+  // -------------------------
+  const startBtn = document.getElementById('start-btn');
+  const startArea = document.getElementById('start-area');
+  const unlockArea = document.getElementById('unlock-area');
+  const codeInput = document.getElementById('code-input');
+  const unlockBtn = document.getElementById('unlock-btn');
+  const hintEl = document.getElementById('hint');
+  const feedbackEl = document.getElementById('feedback');
+  const celebration = document.getElementById('celebration');
+  const hb = document.getElementById('hb');
+  const messageEl = document.getElementById('message');
+  const replayBtn = document.getElementById('replay');
+  const stage = document.getElementById('stage');
+
+  let attempts = 0;
+
+  // -------------------------
+  // Small helpers
+  // -------------------------
+  function formatToday(){
+    const d = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    const yyyy = d.getFullYear();
+    return `${mm}/${dd}/${yyyy}`;
+  }
+  function show(el, display = 'block'){ el.style.display = display; el.setAttribute('aria-hidden','false'); }
+  function hide(el){ el.style.display = 'none'; el.setAttribute('aria-hidden','true'); }
+
+  // -------------------------
+  // Start button -> reveal unlock panel
+  // -------------------------
+  startBtn.addEventListener('click', () => {
+    // micro animation
+    startBtn.animate([{ transform:'translateY(0)' }, { transform:'translateY(-12px) scale(1.02)' }, { transform:'translateY(0)' }], { duration:520, easing:'ease', fill:'forwards' });
+    // fade out start area and show unlock
+    startArea.style.transition = 'opacity 520ms cubic-bezier(.2,.9,.3,1), transform 520ms cubic-bezier(.2,.9,.3,1)';
+    startArea.style.opacity = '0';
+    startArea.style.transform = 'translateY(-6px) scale(.995)';
+    setTimeout(()=> {
+      hide(startArea);
+      show(unlockArea,'flex');
+      codeInput.focus();
+      // slight enter animation for unlock
+      unlockArea.animate([{ opacity:0, transform:'translateY(10px)' }, { opacity:1, transform:'translateY(0)' }], { duration:640, easing:'cubic-bezier(.2,.9,.3,1)' });
+    }, 420);
+  });
+
+  // -------------------------
+  // Unlock logic
+  // -------------------------
+  unlockBtn.addEventListener('click', tryUnlock);
+  codeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') tryUnlock(); });
+
+  function tryUnlock(){
+    const val = (codeInput.value || '').trim();
+    if(!/^\d{4}$/.test(val)){
+      feedbackEl.textContent = 'Please enter a 4-digit number.';
+      return;
+    }
+    attempts++;
+    if(val === CORRECT){
+      onUnlockSuccess();
+    } else {
+      feedbackEl.textContent = 'Incorrect — try again.';
+      if(attempts >= MAX_ATTEMPTS_BEFORE_HINT){
+        hintEl.textContent = `Hint: Today's date is ${formatToday()}`;
+        show(hintEl,'block');
+      }
+      // pulse the input group
+      unlockBtn.animate([{ transform:'translateY(0)' }, { transform:'translateY(-8px)' }, { transform:'translateY(0)' }], { duration:320, easing:'cubic-bezier(.2,.9,.3,1)' });
+    }
+  }
+
+  // -------------------------
+  // Success: DOF zoom + instant message (no typing)
+  // -------------------------
+  async function onUnlockSuccess(){
+    feedbackEl.textContent = '';
+    hintEl.textContent = '';
+    // hide unlock area smoothly
+    unlockArea.style.transition = 'opacity 640ms var(--ease), transform 640ms var(--ease)';
+    unlockArea.style.opacity = '0';
+    unlockArea.style.transform = 'translateY(-8px) scale(.998)';
+    setTimeout(()=> hide(unlockArea), 560);
+
+    // add DOF class which blurs/dims background glass card
+    stage.classList.add('dof');
+
+    // show celebration overlay
+    show(celebration,'flex');
+
+    // animate header zoom + glow
+    hb.classList.remove('glow');
+    hb.style.opacity = '0';
+    hb.style.transform = 'scale(.94)';
+    // small pause for drama
+    await sleep(160);
+
+    // animate large zoom + glow
+    hb.classList.add('glow');
+    // animate further with JS to force GPU
+    hb.animate([
+      { transform: 'scale(.94)', opacity: 0 },
+      { transform: 'scale(1.26)', opacity: 1 }
+    ], { duration: 840, easing: 'cubic-bezier(.2,.9,.3,1)', fill:'forwards' });
+
+    // show message instantly with depth scale (no typing)
+    messageEl.textContent = birthdayMessage;
+    await sleep(360);
+    messageEl.classList.add('visible');
+
+    // small camera-like push (stage subtle scale)
+    stage.animate([
+      { transform: 'scale(1)' },
+      { transform: 'scale(1.03)' },
+      { transform: 'scale(1)' }
+    ], { duration: 1100, easing: 'cubic-bezier(.18,.9,.32,1)' });
+
+    // start confetti & float hearts
+    startConfettiEffects();
+
+    // show replay
+    show(replayBtn,'inline-block');
+    replayBtn.style.opacity = '0';
+    setTimeout(()=> replayBtn.style.opacity = '1', 240);
+  }
+
+  replayBtn.addEventListener('click', () => {
+    // reset UI to before start (keep particles running)
+    attempts = 0;
+    codeInput.value = '';
+    feedbackEl.textContent = '';
+    hintEl.textContent = '';
+    messageEl.textContent = '';
+    messageEl.classList.remove('visible');
+    hb.classList.remove('glow');
+    hide(replayBtn);
+    hide(celebration);
+    stage.classList.remove('dof');
+    // show unlock again
+    show(unlockArea,'flex');
+    unlockArea.style.opacity = '1';
+    unlockArea.style.transform = 'translateY(0)';
+    codeInput.focus();
+    // stop confetti
+    stopConfettiEffects();
+  });
+
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  // -------------------------
+  // Particles: soft flowing orbs across the screen
+  // - soft glow orbs with parallax
+  // - uses lightweight canvas and scaled for DPR
+  // -------------------------
+  (function initParticles(){
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d', { alpha:true });
+    let w = 0, h = 0, dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    let particles = [];
+    const PARTICLE_COUNT = 38; // tuned for performance
+
+    function resize(){
+      dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      w = canvas.clientWidth = window.innerWidth;
+      h = canvas.clientHeight = window.innerHeight;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+
+    function createParticles(){
+      particles = [];
+      for(let i=0;i<PARTICLE_COUNT;i++){
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          baseSize: 12 + Math.random() * 42,
+          size: 12 + Math.random() * 42,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: (Math.random() - 0.5) * 0.3,
+          drift: (Math.random() - 0.5) * 0.6,
+          hue: 250 + Math.random() * 120, // color variance
+          alpha: 0.06 + Math.random() * 0.18,
+          oscill: Math.random() * 6000,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+
+    function step(ts){
+      ctx.clearRect(0,0,w,h);
+      // gentle background gradient glow (subtle)
+      const g = ctx.createLinearGradient(0,0,w,h);
+      g.addColorStop(0, 'rgba(0,0,0,0)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,w,h);
+
+      // draw orbs with additive blending
+      ctx.globalCompositeOperation = 'lighter';
+
+      const t = performance.now();
+      for(let p of particles){
+        // movement with slow sinusoidal sway
+        p.x += p.vx + Math.sin((t + p.phase) * 0.0003) * p.drift;
+        p.y += p.vy + Math.cos((t + p.phase) * 0.0002) * (p.drift * 0.4);
+        // wrap around edges softly
+        if(p.x < -120) p.x = w + 120;
+        if(p.x > w + 120) p.x = -120;
+        if(p.y < -120) p.y = h + 120;
+        if(p.y > h + 120) p.y = -120;
+
+        // pulsate size slowly
+        p.size = p.baseSize * (0.85 + 0.25 * Math.sin((t + p.osc) * 0.0006 + p.phase));
+
+        // draw radial soft circle
+        const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 1.6);
+        const colA = `hsla(${p.hue}, 90%, 65%, ${Math.max(0.04, p.alpha)})`;
+        const colB = `hsla(${(p.hue + 30) % 360}, 90%, 55%, ${Math.max(0.01, p.alpha * 0.06)})`;
+        grd.addColorStop(0, colA);
+        grd.addColorStop(0.35, `hsla(${p.hue}, 88%, 60%, ${Math.max(0.018, p.alpha * 0.8)})`);
+        grd.addColorStop(1, colB);
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 1.35, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      ctx.globalCompositeOperation = 'source-over';
+      requestAnimationFrame(step);
+    }
+
+    // initial sizing & create
+    window.addEventListener('resize', () => { resize(); createParticles(); } );
+    resize(); createParticles();
+    requestAnimationFrame(step);
+  })();
+
+  // -------------------------
+  // Confetti / hearts: a lightweight overlay confetti
+  // We'll reuse a canvas overlay created below (separate to keep particle canvas clean)
+  // -------------------------
+  let confettiRunning = false;
+  let confettiEls = [];
+  let confettiCanvas, confettiCtx, confettiRAF;
+
+  function startConfettiEffects(){
+    // create canvas if missing
+    if(!confettiCanvas){
+      confettiCanvas = document.createElement('canvas');
+      confettiCanvas.style.position = 'fixed';
+      confettiCanvas.style.inset = '0';
+      confettiCanvas.style.pointerEvents = 'none';
+      confettiCanvas.style.zIndex = 30;
+      document.body.appendChild(confettiCanvas);
+      confettiCtx = confettiCanvas.getContext('2d', { alpha:true });
+      window.addEventListener('resize', () => {
+        confettiCanvas.width = window.innerWidth * (window.devicePixelRatio || 1);
+        confettiCanvas.height = window.innerHeight * (window.devicePixelRatio || 1);
+        confettiCanvas.style.width = window.innerWidth + 'px';
+        confettiCanvas.style.height = window.innerHeight + 'px';
+        confettiCtx.setTransform(window.devicePixelRatio || 1,0,0,window.devicePixelRatio || 1,0,0);
+      });
+      // initial size
+      confettiCanvas.width = window.innerWidth * (window.devicePixelRatio || 1);
+      confettiCanvas.height = window.innerHeight * (window.devicePixelRatio || 1);
+      confettiCanvas.style.width = window.innerWidth + 'px';
+      confettiCanvas.style.height = window.innerHeight + 'px';
+      confettiCtx.setTransform(window.devicePixelRatio || 1,0,0,window.devicePixelRatio || 1,0,0);
+    }
+
+    // build elements: mix of small confetti and heart petals
+    confettiEls = [];
+    const count = 72;
+    for(let i=0;i<count;i++){
+      confettiEls.push({
+        x: Math.random() * window.innerWidth,
+        y: -Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 2.6,
+        vy: 1 + Math.random() * 3.6,
+        rot: Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 0.08,
+        size: 8 + Math.random() * 18,
+        life: 0,
+        type: Math.random() > 0.78 ? 'heart' : 'confetti',
+        color: Math.random() > 0.5 ? 'rgba(255,110,160,0.95)' : 'rgba(102,217,255,0.95)'
+      });
+    }
+
+    confettiRunning = true;
+    renderConfetti();
+    // stop after some seconds to avoid perpetual load
+    setTimeout(stopConfettiEffects, 9000);
+  }
+
+  function stopConfettiEffects(){ confettiRunning = false; if(confettiRAF) cancelAnimationFrame(confettiRAF); if(confettiCtx) confettiCtx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height); }
+
+  function renderConfetti(){
+    if(!confettiRunning) return;
+    confettiCtx.clearRect(0,0, confettiCanvas.width, confettiCanvas.height);
+    for(let p of confettiEls){
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vrot;
+      p.life += 1;
+      // draw
+      confettiCtx.save();
+      confettiCtx.translate(p.x, p.y);
+      confettiCtx.rotate(p.rot);
+      if(p.type === 'heart'){
+        drawHeart(confettiCtx, 0, 0, p.size, p.color);
+      } else {
+        confettiCtx.fillStyle = p.color;
+        confettiCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+      }
+      confettiCtx.restore();
+      // recycle
+      if(p.y > window.innerHeight + 60){
+        p.x = Math.random() * window.innerWidth;
+        p.y = -40 - Math.random() * 240;
+        p.vx = (Math.random() - 0.5) * 2.6;
+        p.vy = 1 + Math.random() * 3.6;
+        p.life = 0;
+      }
+    }
+    confettiRAF = requestAnimationFrame(renderConfetti);
+  }
+
+  function drawHeart(ctx, x, y, size, color){
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    const topCurveHeight = size * 0.3;
+    ctx.moveTo(x, y + topCurveHeight);
+    ctx.bezierCurveTo(x, y, x - size/2, y, x - size/2, y + topCurveHeight);
+    ctx.bezierCurveTo(x - size/2, y + (size+topCurveHeight)/2, x, y + (size+topCurveHeight)/1.2, x, y + size);
+    ctx.bezierCurveTo(x, y + (size+topCurveHeight)/1.2, x + size/2, y + (size+topCurveHeight)/2, x + size/2, y + topCurveHeight);
+    ctx.bezierCurveTo(x + size/2, y, x, y, x, y + topCurveHeight);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // -------------------------
+  // Accessibility & small polish
+  // -------------------------
+  // prevent mobile keyboard from jumping everything up when focusing input: scroll into view handled gracefully
+  codeInput.addEventListener('focus', () => { setTimeout(()=> codeInput.scrollIntoView({behavior:'smooth', block:'center'}), 120); });
+
+  // allow pressing "0-9" only (soft guard)
+  codeInput.addEventListener('input', () => {
+    codeInput.value = codeInput.value.replace(/[^\d]/g,'').slice(0,4);
+  });
+
+  // Set initial focus to start button
+  startBtn.focus({preventScroll:true});
+
+  // -------------------------
+  // Reduced motion fallback: if user prefers reduce, simplify animations
+  // -------------------------
+  const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(prefersReduce){
+    // limit particle animation by hiding them
+    const pw = document.getElementById('particle-wrap');
+    if(pw) pw.style.display = 'none';
+  }
+
+  // -------------------------
+  // Final note:
+  // - This is an intentionally self-contained file. If you want music, different fonts,
+  //   or a variant (petals instead of hearts), say which and I’ll update.
+  // -------------------------
+  </script>
 </body>
 </html>
