@@ -6,7 +6,7 @@
 <title>Happy Birthday, Angelina</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Caveat:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Kaushan+Script&family=Caveat:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --pink:#ff5f9e;
@@ -285,31 +285,71 @@
     flex-direction:column;
     align-items:center;
     width:100%;
+    position:relative;
   }
   #headline{
-    font-family:'Caveat', cursive;
-    font-weight:700;
-    font-size:clamp(32px, 7.2vw, 76px);
+    font-family:'Kaushan Script', cursive;
+    font-weight:400;
+    font-size:clamp(28px, 6.4vw, 62px);
     color:var(--warm);
-    line-height:1.3;
+    line-height:1.35;
     min-height:1px;
-    padding-bottom:6px;
+    padding:4px 6px 10px;
   }
-  #headline .line{ display:block; white-space:nowrap; }
+  #headline .line{ display:block; }
   #headline .letter{
     display:inline-block;
     opacity:0;
-    transform:translateY(16px) rotate(var(--r,0deg));
-    animation: letterWrite 0.5s cubic-bezier(.2,.9,.3,1) forwards;
+    transform:translateY(20px) scale(0.3) rotate(var(--r,0deg));
+    animation: letterPop 0.62s cubic-bezier(.2,1.3,.35,1) forwards;
     text-shadow:
       0 0 10px rgba(255,95,158,0.6),
       0 0 24px rgba(255,95,158,0.4),
       0 0 44px rgba(160,107,255,0.3);
   }
-  @keyframes letterWrite{
-    0%{ opacity:0; transform:translateY(16px) rotate(var(--r,0deg)) scale(0.8); }
-    60%{ opacity:1; }
-    100%{ opacity:1; transform:translateY(0) rotate(0deg) scale(1); }
+  @keyframes letterPop{
+    0%{ opacity:0; transform:translateY(20px) scale(0.3) rotate(var(--r,0deg)); }
+    45%{ opacity:1; transform:translateY(-8px) scale(1.32) rotate(calc(var(--r,0deg) * 0.25)); }
+    72%{ transform:translateY(3px) scale(0.93) rotate(0deg); }
+    100%{ opacity:1; transform:translateY(0) scale(1) rotate(0deg); }
+  }
+  #headline.glow-loop{
+    animation: headlineGlow 2.6s ease-in-out infinite, headlineFloat 4.4s ease-in-out infinite;
+  }
+  @keyframes headlineGlow{
+    0%,100%{ filter:drop-shadow(0 0 16px rgba(255,95,158,0.5)) drop-shadow(0 0 30px rgba(160,107,255,0.32)); }
+    50%{ filter:drop-shadow(0 0 32px rgba(255,95,158,0.85)) drop-shadow(0 0 58px rgba(160,107,255,0.55)); }
+  }
+  @keyframes headlineFloat{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-6px); }
+  }
+  #headlineShine{
+    position:absolute;
+    inset:0;
+    font-family:'Kaushan Script', cursive;
+    font-weight:400;
+    font-size:clamp(28px, 6.4vw, 62px);
+    line-height:1.35;
+    padding:4px 6px 10px;
+    text-align:center;
+    color:transparent;
+    background:linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.95) 50%, transparent 60%);
+    background-size:250% 100%;
+    background-position:150% 0;
+    -webkit-background-clip:text;
+    background-clip:text;
+    pointer-events:none;
+    opacity:0;
+  }
+  #headlineShine.sweep{
+    opacity:1;
+    animation: shineSweep 3.4s ease-in-out infinite;
+  }
+  @keyframes shineSweep{
+    0%{ background-position:150% 0; }
+    35%{ background-position:-50% 0; }
+    100%{ background-position:-50% 0; }
   }
 
   /* glowing divider that draws itself in between headline and message */
@@ -362,61 +402,6 @@
     pointer-events:none;
     z-index:20;
   }
-
-  /* ---------- Now playing chip ---------- */
-  #nowPlaying{
-    position:fixed;
-    bottom:22px;
-    left:22px;
-    z-index:30;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:10px 16px 10px 12px;
-    border-radius:100px;
-    background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.14);
-    backdrop-filter:blur(20px) saturate(160%);
-    -webkit-backdrop-filter:blur(20px) saturate(160%);
-    box-shadow:0 10px 30px rgba(0,0,0,0.5);
-    opacity:0;
-    transform:translateY(16px);
-    transition:opacity 0.6s ease, transform 0.6s ease;
-    max-width:min(78vw, 300px);
-  }
-  #nowPlaying.show{ opacity:1; transform:translateY(0); }
-  .np-icon{
-    width:34px;
-    height:34px;
-    border-radius:50%;
-    background:linear-gradient(135deg, var(--pink), var(--violet));
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-shrink:0;
-    font-size:15px;
-    animation:npSpin 6s linear infinite;
-  }
-  @keyframes npSpin{ from{ transform:rotate(0deg);} to{ transform:rotate(360deg);} }
-  .np-bars{ display:flex; align-items:flex-end; gap:2px; height:14px; flex-shrink:0; }
-  .np-bars span{ width:3px; background:var(--pink); border-radius:2px; animation:npBar 0.9s ease-in-out infinite; }
-  .np-bars span:nth-child(2){ animation-delay:0.15s; background:var(--violet);}
-  .np-bars span:nth-child(3){ animation-delay:0.3s; background:var(--amber);}
-  @keyframes npBar{ 0%,100%{ height:4px;} 50%{ height:14px;} }
-  .np-text{ display:flex; flex-direction:column; text-align:left; overflow:hidden; }
-  .np-title{ font-size:12.5px; font-weight:700; color:var(--warm); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .np-artist{ font-size:11px; color:rgba(251,238,252,0.55); white-space:nowrap; }
-  .np-toggle{
-    background:none;
-    border:none;
-    color:var(--warm);
-    opacity:0.7;
-    cursor:pointer;
-    font-size:16px;
-    padding:4px;
-    flex-shrink:0;
-  }
-  .np-toggle:hover{ opacity:1; }
 
   @media (max-width:480px){
     #screen-start .card, #screen-lock .card{ padding:40px 26px; }
@@ -474,17 +459,6 @@
     </div>
   </div>
 
-</div>
-
-<!-- Now playing chip -->
-<div id="nowPlaying">
-  <div class="np-icon">🎵</div>
-  <div class="np-bars"><span></span><span></span><span></span></div>
-  <div class="np-text">
-    <div class="np-title">Summertime Sadness</div>
-    <div class="np-artist">Lana Del Rey</div>
-  </div>
-  <button class="np-toggle" id="npToggle">🔊</button>
 </div>
 
 <!-- Hidden YouTube audio player: kept full-size but placed off-screen
@@ -817,8 +791,8 @@ window.onYouTubeIframeAPIReady = function(){
   ytPlayer = new YT.Player('yt-player', {
     width: '200',
     height: '113',
-    videoId: 'TdrL3QxjyVw',
-    playerVars: { autoplay:0, controls:0, disablekb:1, modestbranding:1, rel:0, playsinline:1 },
+    videoId: 'o3SqUUoJjW8',
+    playerVars: { autoplay:0, controls:0, disablekb:1, modestbranding:1, rel:0, playsinline:1, start:10 },
     events: {
       'onReady': ()=>{ ytReady = true; }
     }
@@ -849,21 +823,8 @@ function playMusicNow(){
     ytPlayer.unMute();
     ytPlayer.setVolume(70);
     ytPlayer.playVideo();
-    document.getElementById('nowPlaying').classList.add('show');
   }catch(e){ /* if a browser/extension blocks it, the page still works fine without it */ }
 }
-
-document.getElementById('npToggle').addEventListener('click', ()=>{
-  if(!ytPlayer) return;
-  musicMuted = !musicMuted;
-  if(musicMuted){
-    ytPlayer.mute();
-    document.getElementById('npToggle').textContent = '🔈';
-  } else {
-    ytPlayer.unMute();
-    document.getElementById('npToggle').textContent = '🔊';
-  }
-});
 
 document.addEventListener('touchstart', ()=>{}, {passive:true});
 </script>
