@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Happy Birthday, Angelina</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,14 +20,21 @@
 
   *{margin:0;padding:0;box-sizing:border-box;}
 
-  html,body{
+  html{
+    height:100%;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
+  body{
     height:100%;
     width:100%;
     overflow:hidden;
+    overscroll-behavior:none;
     background:#030304;
     font-family:'Quicksand', sans-serif;
     color:var(--warm);
-    position:relative;
+    position:fixed;
+    inset:0;
   }
 
   #bgCanvas{
@@ -37,7 +44,6 @@
     display:block;
   }
 
-  /* cursor-following soft spotlight */
   #spotlight{
     position:fixed;
     inset:0;
@@ -47,21 +53,21 @@
   }
 
   #app{
-    position:relative;
-    height:100vh;
-    width:100vw;
+    position:fixed;
+    inset:0;
     display:flex;
     align-items:center;
     justify-content:center;
     z-index:5;
+    overflow:hidden;
   }
 
   /* ---------- Glass card base ---------- */
   .glass-card{
     background:var(--glass);
     border:1px solid var(--glass-border);
-    backdrop-filter: blur(28px) saturate(160%);
-    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
     border-radius:30px;
     box-shadow:
       0 20px 60px rgba(0,0,0,0.6),
@@ -92,6 +98,8 @@
     flex-direction:column;
     text-align:center;
     padding:24px;
+    will-change: transform, filter, opacity;
+    transform:translateZ(0);
   }
   .screen.hidden{
     opacity:0;
@@ -257,26 +265,35 @@
     align-items:center;
   }
   #screen-reveal .card{
-    padding:60px 46px 54px;
-    max-width:640px;
+    padding:56px 46px 50px;
+    max-width:620px;
     width:92%;
-    max-height:86vh;
+    max-height:88vh;
     overflow-y:auto;
+    overflow-x:hidden;
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:28px;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
   }
-  #screen-reveal .card::-webkit-scrollbar{ width:5px; }
-  #screen-reveal .card::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.2); border-radius:10px; }
+  #screen-reveal .card::-webkit-scrollbar{ display:none; width:0; height:0; }
 
+  /* headline block: fixed, generous space so nothing below can ever intersect it */
+  #headlineBlock{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+  }
   #headline{
     font-family:'Caveat', cursive;
     font-weight:700;
-    font-size:clamp(42px, 8vw, 76px);
+    font-size:clamp(32px, 7.2vw, 76px);
     color:var(--warm);
-    line-height:1.15;
+    line-height:1.3;
     min-height:1px;
+    padding-bottom:6px;
   }
   #headline .line{ display:block; white-space:nowrap; }
   #headline .letter{
@@ -295,6 +312,19 @@
     100%{ opacity:1; transform:translateY(0) rotate(0deg) scale(1); }
   }
 
+  /* glowing divider that draws itself in between headline and message */
+  #divider{
+    width:0%;
+    max-width:180px;
+    height:2px;
+    margin:22px 0 22px;
+    border-radius:2px;
+    background:linear-gradient(90deg, transparent, var(--pink), var(--violet), transparent);
+    box-shadow:0 0 14px rgba(255,95,158,0.6);
+    transition: width 0.8s cubic-bezier(.4,0,.2,1);
+  }
+  #divider.show{ width:55%; }
+
   #message{
     font-size:16.5px;
     line-height:1.85;
@@ -302,6 +332,7 @@
     text-align:left;
     opacity:0;
     max-width:520px;
+    width:100%;
     font-weight:500;
     filter:blur(10px);
     transform:scale(0.94);
@@ -314,6 +345,7 @@
     font-size:32px;
     color:var(--pink);
     opacity:0;
+    margin-top:22px;
     transition: opacity 1s ease;
     align-self:flex-end;
   }
@@ -390,7 +422,10 @@
     #screen-start .card, #screen-lock .card{ padding:40px 26px; }
     #startBtn{ font-size:42px; padding:14px 42px 18px; }
     .code-box{ width:46px; height:58px; font-size:24px; }
-    #screen-reveal .card{ padding:44px 24px 40px; }
+    #screen-reveal .card{ padding:46px 22px 38px; }
+    #headline{ font-size:clamp(28px, 8.6vw, 52px); line-height:1.35; }
+    #divider{ margin:18px 0; }
+    #message{ font-size:15px; line-height:1.75; }
   }
 </style>
 </head>
@@ -430,8 +465,11 @@
   <!-- SCREEN 3: REVEAL -->
   <div class="screen hidden" id="screen-reveal">
     <div class="glass-card card">
-      <div id="headline"></div>
-      <div id="message"></div>
+      <div id="headlineBlock">
+        <div id="headline"></div>
+      </div>
+      <div id="divider"></div>
+      <div id="message">Happy birthday to my beautifully cute girl, Angelina 🥹❤️. I’m genuinely so grateful to have you in my life, and I hope you know how much you mean to me. You make me happy in ways you probably don’t even realize, and even through all our jokes, random conversations, teasing, and little moments together, you’ve become someone I care about so deeply. I love your personality and all the little things that make you uniquely you. You’re not just my girlfriend—you’re my favorite person, my comfort, and someone I always want by my side. I hope this new year of your life brings you nothing but happiness, peace, love, and everything your heart desires, because you truly deserve the world. I’m so proud of the woman you are, and I can’t wait to make even more memories with you. Happy birthday, my love. I love you so much, Angelinka, and I hope today makes you feel as special and appreciated as you make me feel every day ❤️🎂</div>
       <div class="signature" id="signature">— your love</div>
     </div>
   </div>
@@ -449,8 +487,11 @@
   <button class="np-toggle" id="npToggle">🔊</button>
 </div>
 
-<!-- Hidden YouTube audio player -->
-<div id="yt-player" style="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;bottom:0;left:0;"></div>
+<!-- Hidden YouTube audio player: kept full-size but placed off-screen
+     (a 1x1 / opacity:0 iframe is unreliable for playback) -->
+<div id="yt-player-wrap" style="position:fixed;top:-9999px;left:-9999px;width:200px;height:113px;overflow:hidden;pointer-events:none;">
+  <div id="yt-player"></div>
+</div>
 
 <script>
 /* =========================================================
@@ -475,20 +516,17 @@ window.addEventListener('resize', resize);
 resize();
 
 const palette = [
-  {r:255, g:95,  b:158},  // pink
-  {r:160, g:107, b:255},  // violet
-  {r:255, g:181, b:69},   // amber
-  {r:72,  g:224, b:200},  // teal
+  {r:255, g:95,  b:158},
+  {r:160, g:107, b:255},
+  {r:255, g:181, b:69},
+  {r:72,  g:224, b:200},
 ];
 
-/* big soft bokeh blobs, slow organic drift */
 const bokeh = [];
 const BOKEH_COUNT = 7;
 for(let i=0;i<BOKEH_COUNT;i++){
   const c = palette[i % palette.length];
   bokeh.push({
-    x: Math.random()*W,
-    y: Math.random()*H,
     baseR: 160 + Math.random()*180,
     color: c,
     angle: Math.random()*Math.PI*2,
@@ -501,7 +539,6 @@ for(let i=0;i<BOKEH_COUNT;i++){
   });
 }
 
-/* fine twinkling dust particles, drifting slowly upward with sway */
 const dust = [];
 const DUST_COUNT = 90;
 for(let i=0;i<DUST_COUNT;i++){
@@ -511,7 +548,7 @@ for(let i=0;i<DUST_COUNT;i++){
     y: Math.random()*H,
     r: 0.8 + Math.random()*2,
     color:c,
-    speedY: 6 + Math.random()*14, // px per second upward
+    speedY: 6 + Math.random()*14,
     swayAmp: 10 + Math.random()*24,
     swaySpeed: 0.2 + Math.random()*0.4,
     swayOffset: Math.random()*Math.PI*2,
@@ -532,7 +569,6 @@ function drawFrame(now){
   ctx.fillStyle = '#030304';
   ctx.fillRect(0,0,W,H);
 
-  /* bokeh layer - additive glow */
   ctx.globalCompositeOperation = 'lighter';
   bokeh.forEach(b=>{
     b.angle += b.speed * dt;
@@ -550,7 +586,6 @@ function drawFrame(now){
     ctx.fill();
   });
 
-  /* dust layer */
   dust.forEach(d=>{
     d.y -= d.speedY * dt;
     if(d.y < -10){
@@ -583,7 +618,8 @@ window.addEventListener('pointermove', (e)=>{
 });
 
 /* =========================================================
-   Screen transitions via Web Animations API (real zoom+blur)
+   Screen transitions via Web Animations API — real zoom+blur,
+   tuned so the motion is visible immediately on every device
    ========================================================= */
 const screenStart = document.getElementById('screen-start');
 const screenLock = document.getElementById('screen-lock');
@@ -591,19 +627,25 @@ const screenReveal = document.getElementById('screen-reveal');
 
 function transitionTo(hideEl, showEl, onMidpoint){
   hideEl.style.pointerEvents = 'none';
+
   const hideAnim = hideEl.animate([
-    { transform:'scale(1)', filter:'blur(0px)', opacity:1 },
-    { transform:'scale(1.7)', filter:'blur(34px)', opacity:0 }
-  ], { duration:750, easing:'cubic-bezier(.5,0,.75,0)', fill:'forwards' });
+    { transform:'scale(1)',    filter:'blur(0px)',   opacity:1 },
+    { transform:'scale(1.05)', filter:'blur(4px)',   opacity:0.9, offset:0.15 },
+    { transform:'scale(1.45)', filter:'blur(16px)',  opacity:0.35, offset:0.6 },
+    { transform:'scale(1.9)',  filter:'blur(26px)',  opacity:0 }
+  ], { duration:900, easing:'cubic-bezier(.36,0,.66,-0.02)', fill:'forwards' });
 
   hideAnim.onfinish = ()=>{
     hideEl.classList.add('hidden');
     showEl.classList.remove('hidden');
     if(onMidpoint) onMidpoint();
+
     showEl.animate([
-      { transform:'scale(0.65)', filter:'blur(34px)', opacity:0 },
-      { transform:'scale(1)', filter:'blur(0px)', opacity:1 }
-    ], { duration:850, easing:'cubic-bezier(.16,1,.3,1)', fill:'forwards' });
+      { transform:'scale(0.55)', filter:'blur(26px)', opacity:0 },
+      { transform:'scale(0.85)', filter:'blur(10px)', opacity:0.6, offset:0.4 },
+      { transform:'scale(1.04)', filter:'blur(2px)',  opacity:1,   offset:0.82 },
+      { transform:'scale(1)',    filter:'blur(0px)',  opacity:1 }
+    ], { duration:900, easing:'cubic-bezier(.16,1,.3,1)', fill:'forwards' });
   };
 }
 
@@ -708,16 +750,19 @@ function typeHeadline(){
     el.style.animationDelay = (i * 0.055) + 's';
   });
 
-  const totalDelay = allLetters.length * 55 + 500;
-  setTimeout(showMessage, totalDelay);
+  const totalDelay = allLetters.length * 55 + 450;
+  setTimeout(revealDivider, totalDelay);
+}
+
+function revealDivider(){
+  document.getElementById('divider').classList.add('show');
+  setTimeout(showMessage, 550);
 }
 
 function showMessage(){
   const msg = document.getElementById('message');
-  const text = "Happy birthday to my beautifully cute girl, Angelina \u{1F97A}\u2764\uFE0F. I\u2019m genuinely so grateful to have you in my life, and I hope you know how much you mean to me. You make me happy in ways you probably don\u2019t even realize, and even through all our jokes, random conversations, teasing, and little moments together, you\u2019ve become someone I care about so deeply. I love your personality and all the little things that make you uniquely you. You\u2019re not just my girlfriend\u2014you\u2019re my favorite person, my comfort, and someone I always want by my side. I hope this new year of your life brings you nothing but happiness, peace, love, and everything your heart desires, because you truly deserve the world. I\u2019m so proud of the woman you are, and I can\u2019t wait to make even more memories with you. Happy birthday, my love. I love you so much, Angelinka, and I hope today makes you feel as special and appreciated as you make me feel every day \u2764\uFE0F\uD83C\uDF82";
-  msg.textContent = text;
+  msg.classList.add('show');
   setTimeout(()=>{
-    msg.classList.add('show');
     launchConfetti();
     setTimeout(()=>{
       document.getElementById('signature').classList.add('show');
@@ -751,43 +796,61 @@ function launchConfetti(){
 
 /* =========================================================
    Background music — Lana Del Rey, "Summertime Sadness"
-   played via the official YouTube embed (audio only, hidden player)
+   played via the official YouTube embed player.
+
+   IMPORTANT for autoplay-with-sound to actually work: the
+   player must already exist and be READY *before* the click,
+   so that playVideo() runs synchronously inside the click
+   handler (that's what satisfies the browser's user-gesture
+   requirement). Waiting to create the player until after the
+   click is what silently blocked the audio before.
    ========================================================= */
 let ytPlayer = null;
 let ytReady = false;
-let pendingPlay = false;
 let musicMuted = false;
 
 const ytApiTag = document.createElement('script');
 ytApiTag.src = "https://www.youtube.com/iframe_api";
-document.body.appendChild(ytApiTag);
+document.head.appendChild(ytApiTag);
 
 window.onYouTubeIframeAPIReady = function(){
   ytPlayer = new YT.Player('yt-player', {
+    width: '200',
+    height: '113',
     videoId: 'TdrL3QxjyVw',
     playerVars: { autoplay:0, controls:0, disablekb:1, modestbranding:1, rel:0, playsinline:1 },
     events: {
-      'onReady': ()=>{
-        ytReady = true;
-        if(pendingPlay) playMusicNow();
-      }
+      'onReady': ()=>{ ytReady = true; }
     }
   });
 };
 
 function startMusic(){
-  if(ytReady){
+  if(ytReady && ytPlayer){
     playMusicNow();
   } else {
-    pendingPlay = true;
+    /* API/player not ready yet (rare) — try a couple of quick retries
+       while we're still inside the user-gesture window */
+    let tries = 0;
+    const retry = setInterval(()=>{
+      tries++;
+      if(ytReady && ytPlayer){
+        clearInterval(retry);
+        playMusicNow();
+      } else if(tries > 20){
+        clearInterval(retry);
+      }
+    }, 100);
   }
 }
 
 function playMusicNow(){
   try{
+    ytPlayer.unMute();
+    ytPlayer.setVolume(70);
     ytPlayer.playVideo();
     document.getElementById('nowPlaying').classList.add('show');
-  }catch(e){ /* embed may be blocked by browser/ad-blocker; page still works fine without it */ }
+  }catch(e){ /* if a browser/extension blocks it, the page still works fine without it */ }
 }
 
 document.getElementById('npToggle').addEventListener('click', ()=>{
@@ -802,7 +865,6 @@ document.getElementById('npToggle').addEventListener('click', ()=>{
   }
 });
 
-/* keep focus on mobile taps */
 document.addEventListener('touchstart', ()=>{}, {passive:true});
 </script>
 
