@@ -5,25 +5,26 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Happy Birthday — Surprise</title>
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="stage" id="stage">
+  <div id="stage" class="stage">
+    <div class="bg-orbit"></div>
     <div class="background-layer"></div>
 
     <!-- Start screen -->
-    <div id="start-screen" class="centered glass-panel">
+    <div id="start-screen" class="centered glass-panel panel-start revealed">
       <button id="start-btn" class="handwriting start-btn" aria-label="Start">Start</button>
       <p class="subtle">Tap to begin</p>
     </div>
 
     <!-- Unlock panel -->
-    <div id="unlock-panel" class="centered glass-panel hidden" role="region" aria-live="polite">
+    <div id="unlock-panel" class="centered glass-panel panel-unlock hidden" role="region" aria-live="polite">
       <p class="lead">Today is someone's special day.</p>
-      <p class="muted">Type the correct 4 digit number to unlock a secret about them.</p>
+      <p class="muted">Type the correct 4-digit number to unlock a secret about them.</p>
 
       <div class="code-row">
         <input id="code-input" class="code-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" aria-label="4 digit code" />
@@ -36,8 +37,8 @@
 
     <!-- Celebration / result -->
     <div id="celebration" class="centered celebration hidden" role="dialog" aria-modal="true">
-      <h1 id="hb-head" class="handwriting big-handwriting"></h1>
-      <div id="message" class="message readable"></div>
+      <h1 id="hb-head" class="handwriting big-handwriting" aria-hidden="true">HAPPY BIRTHDAY MY ANGELINA</h1>
+      <div id="message" class="message readable" aria-live="polite"></div>
       <button id="replay" class="btn subtle-btn hidden">Play again</button>
     </div>
 
