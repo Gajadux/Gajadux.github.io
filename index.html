@@ -155,19 +155,18 @@
     filter:drop-shadow(0 0 18px rgba(255,45,85,0.6)) drop-shadow(0 0 40px rgba(255,95,158,0.4));
   }
   #heroLily .hpetal{
-    fill:rgba(255,110,150,0.12);
+    fill:rgba(255,110,150,0.14);
+    fill-opacity:0;
     stroke:url(#lilyGradient);
-    stroke-width:2;
-    transform-box:view-box;
-    transform-origin:50px 50px;
-    transform:rotate(calc(var(--i) * 60deg)) scale(0.15);
-    opacity:0;
+    stroke-width:2.2;
+    stroke-dasharray: var(--plen, 140);
+    stroke-dashoffset: var(--plen, 140);
   }
   #heroLily .stamen{ stroke:rgba(255,244,248,0.9); stroke-width:1.3; opacity:0; }
   #heroLily .anther{ fill:#ff2d55; opacity:0; }
   #heroLily .lily-center{ fill:#ff2d55; opacity:0; }
 
-  /* bloom: petals unfurl as if opening toward the sun */
+  /* bloom: petal outlines draw themselves on, then fill with color/glow — as if opening toward the sun */
   #heroLilyWrap.blooming{
     animation: heroWrapIn 0.5s ease-out forwards;
   }
@@ -183,20 +182,19 @@
   }
 
   #heroLilyWrap.blooming .hpetal{
-    animation: heroPetalBloom 0.85s cubic-bezier(.2,1.2,.3,1) forwards;
-    animation-delay: calc(var(--i) * 0.09s);
+    animation: heroPetalDraw 0.9s ease-out forwards;
+    animation-delay: calc(var(--i) * 0.1s);
   }
-  @keyframes heroPetalBloom{
-    0%{   transform:rotate(calc(var(--i) * 60deg)) scale(0.15); opacity:0; }
-    55%{  transform:rotate(calc(var(--i) * 60deg)) scale(1.18); opacity:1; }
-    78%{  transform:rotate(calc(var(--i) * 60deg)) scale(0.94); }
-    100%{ transform:rotate(calc(var(--i) * 60deg)) scale(1);    opacity:1; }
+  @keyframes heroPetalDraw{
+    0%{   stroke-dashoffset: var(--plen, 140); fill-opacity:0; }
+    60%{  stroke-dashoffset: 0;                fill-opacity:0; }
+    100%{ stroke-dashoffset: 0;                fill-opacity:1; }
   }
   #heroLilyWrap.blooming .stamen,
   #heroLilyWrap.blooming .anther,
   #heroLilyWrap.blooming .lily-center{
     animation: heroFadeIn 0.6s ease-out forwards;
-    animation-delay:0.55s;
+    animation-delay:0.6s;
   }
   @keyframes heroFadeIn{ to{ opacity:1; } }
 
@@ -204,8 +202,8 @@
     animation: heroBreathe 1.8s ease-in-out infinite;
   }
   @keyframes heroBreathe{
-    0%,100%{ filter:drop-shadow(0 0 18px rgba(255,45,85,0.6)) drop-shadow(0 0 40px rgba(255,95,158,0.4)); transform:scale(1); }
-    50%{ filter:drop-shadow(0 0 30px rgba(255,45,85,0.9)) drop-shadow(0 0 60px rgba(255,95,158,0.6)); transform:scale(1.05); }
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.06); }
   }
 
   /* zoom-through: rotate + scale up hugely, as if flying past the flower into the reveal */
@@ -459,7 +457,7 @@
     min-height:1px;
     padding:4px 6px 10px;
   }
-  #headline .line{ display:block; }
+  #headline .line{ display:block; white-space:nowrap; }
   #headline .letter{
     display:inline-block;
     opacity:0;
@@ -543,17 +541,6 @@
   }
   #message.show{ opacity:1; filter:blur(0); transform:scale(1); }
 
-  .signature{
-    font-family:'Great Vibes', cursive;
-    font-size:32px;
-    color:var(--pink);
-    opacity:0;
-    margin-top:22px;
-    transition: opacity 1s ease;
-    align-self:flex-end;
-  }
-  .signature.show{ opacity:1; }
-
   /* confetti burst */
   .burst-piece{
     position:fixed;
@@ -620,12 +607,12 @@
   <div id="heroLilyBurst"></div>
   <svg id="heroLily" viewBox="0 0 100 100">
     <g class="hero-petals">
-      <path class="hpetal" style="--i:0" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/>
-      <path class="hpetal" style="--i:1" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/>
-      <path class="hpetal" style="--i:2" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/>
-      <path class="hpetal" style="--i:3" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/>
-      <path class="hpetal" style="--i:4" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/>
-      <path class="hpetal" style="--i:5" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/>
+      <g class="petal-slot" transform="rotate(0 50 50)"><path class="hpetal" style="--i:0" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/></g>
+      <g class="petal-slot" transform="rotate(60 50 50)"><path class="hpetal" style="--i:1" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/></g>
+      <g class="petal-slot" transform="rotate(120 50 50)"><path class="hpetal" style="--i:2" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/></g>
+      <g class="petal-slot" transform="rotate(180 50 50)"><path class="hpetal" style="--i:3" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/></g>
+      <g class="petal-slot" transform="rotate(240 50 50)"><path class="hpetal" style="--i:4" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/></g>
+      <g class="petal-slot" transform="rotate(300 50 50)"><path class="hpetal" style="--i:5" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/></g>
     </g>
     <g class="hero-stamens">
       <line x1="50" y1="50" x2="45" y2="37" class="stamen"/>
@@ -676,7 +663,6 @@
       </div>
       <div id="divider"></div>
       <div id="message">Happy birthday to my beautifully cute girl, Angelina 🥹❤️. I’m genuinely so grateful to have you in my life, and I hope you know how much you mean to me. You make me happy in ways you probably don’t even realize, and even through all our jokes, random conversations, teasing, and little moments together, you’ve become someone I care about so deeply. I love your personality and all the little things that make you uniquely you. You’re not just my girlfriend—you’re my favorite person, my comfort, and someone I always want by my side. I hope this new year of your life brings you nothing but happiness, peace, love, and everything your heart desires, because you truly deserve the world. I’m so proud of the woman you are, and I can’t wait to make even more memories with you. Happy birthday, my love. I love you so much, Angelinka, and I hope today makes you feel as special and appreciated as you make me feel every day ❤️🎂</div>
-      <div class="signature" id="signature">— your love</div>
     </div>
   </div>
 
@@ -850,18 +836,44 @@ const startBtn = document.getElementById('startBtn');
 startBtn.addEventListener('click', ()=>{
   startMusic();
   startBtn.style.pointerEvents = 'none';
+  screenStart.style.pointerEvents = 'none';
 
-  playLily({ zoomOut:false, holdMs:500 });
+  // fade the start card down first, then let the lily have the stage to itself
+  screenStart.animate([
+    { opacity:1, filter:'blur(0px)' },
+    { opacity:0, filter:'blur(10px)' }
+  ], { duration:500, easing:'ease-in', fill:'forwards' });
 
-  transitionTo(screenStart, screenLock, ()=>{
-    setTimeout(()=> hiddenInput.focus(), 250);
-  });
+  setTimeout(()=>{
+    screenStart.classList.add('hidden');
+
+    playLily({
+      zoomOut:false,
+      holdMs:350,
+      onDone:()=>{
+        screenLock.classList.remove('hidden');
+        screenLock.animate([
+          { transform:'scale(0.92)', opacity:0 },
+          { transform:'scale(1)',   opacity:1 }
+        ], { duration:500, easing:'cubic-bezier(.16,1,.3,1)', fill:'forwards' });
+        setTimeout(()=> hiddenInput.focus(), 300);
+      }
+    });
+  }, 350);
 });
 
 /* =========================================================
    Hero lily: cinematic bloom + rotate + zoom-through moments
    ========================================================= */
 const heroLilyWrap = document.getElementById('heroLilyWrap');
+
+document.querySelectorAll('#heroLily .hpetal').forEach(el=>{
+  try{
+    const len = el.getTotalLength();
+    el.style.setProperty('--plen', len);
+  }catch(e){ /* fallback CSS value already covers this */ }
+});
+
 
 /**
  * Plays: fade in -> petals bloom open (like seeing the sun) -> holds
@@ -874,7 +886,7 @@ function playLily({ zoomOut = false, holdMs = 550, onBloomed, onDone } = {}){
   void heroLilyWrap.offsetWidth; // restart animations
   heroLilyWrap.classList.add('blooming');
 
-  const bloomDuration = 850 + 5*90 + 100; // last petal delay + its own duration + buffer
+  const bloomDuration = 900 + 5*100 + 100; // last petal delay + its own duration + buffer
   setTimeout(()=>{
     if(onBloomed) onBloomed();
 
@@ -891,8 +903,12 @@ function playLily({ zoomOut = false, holdMs = 550, onBloomed, onDone } = {}){
       heroLilyWrap.classList.add('breathing');
       setTimeout(()=>{
         heroLilyWrap.classList.remove('blooming','breathing');
+        heroLilyWrap.style.transition = 'opacity 0.4s ease';
         heroLilyWrap.style.opacity = '0';
-        if(onDone) onDone();
+        setTimeout(()=>{
+          heroLilyWrap.style.transition = '';
+          if(onDone) onDone();
+        }, 420);
       }, holdMs);
     }
   }, bloomDuration);
@@ -1005,7 +1021,7 @@ function typeHeadline(){
   const headline = document.getElementById('headline');
   headline.innerHTML = '';
   const line1 = buildHandwrittenLine('HAPPY BIRTHDAY');
-  const line2 = buildHandwrittenLine('MY ANGELINA');
+  const line2 = buildHandwrittenLine('ANGELINA');
   headline.appendChild(line1);
   headline.appendChild(line2);
 
@@ -1028,9 +1044,6 @@ function showMessage(){
   msg.classList.add('show');
   setTimeout(()=>{
     launchConfetti();
-    setTimeout(()=>{
-      document.getElementById('signature').classList.add('show');
-    }, 900);
   }, 300);
 }
 
@@ -1111,9 +1124,22 @@ function startMusic(){
 function playMusicNow(){
   try{
     ytPlayer.unMute();
-    ytPlayer.setVolume(70);
+    ytPlayer.setVolume(0);
     ytPlayer.playVideo();
+    fadeMusicIn(70, 2800);
   }catch(e){ /* if a browser/extension blocks it, the page still works fine without it */ }
+}
+
+function fadeMusicIn(targetVolume, durationMs){
+  const steps = 24;
+  const stepTime = durationMs / steps;
+  let step = 0;
+  const fade = setInterval(()=>{
+    step++;
+    const vol = Math.round((targetVolume * step) / steps);
+    try{ ytPlayer.setVolume(vol); }catch(e){}
+    if(step >= steps) clearInterval(fade);
+  }, stepTime);
 }
 
 document.addEventListener('touchstart', ()=>{}, {passive:true});
