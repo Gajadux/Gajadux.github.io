@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Happy Birthday, Angelina</title>
+<title>🎂 Happy Birthday, Angelina</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23ff5f9e' d='M16 29S3 20.5 3 11.5C3 6.8 6.8 3 11.4 3c2.6 0 4.9 1.3 6.6 3.4C19.7 4.3 22 3 24.6 3 29.2 3 33 6.8 33 11.5 33 20.5 16 29 16 29z' transform='translate(-1,0) scale(0.94)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Kaushan+Script&family=Caveat:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -35,6 +36,32 @@
     color:var(--warm);
     position:fixed;
     inset:0;
+  }
+
+  #curtain{
+    position:fixed;
+    inset:0;
+    background:#000;
+    z-index:60;
+    pointer-events:none;
+    animation: curtainRise 1.5s ease-out forwards;
+    animation-delay:0.25s;
+  }
+  @keyframes curtainRise{
+    0%{ opacity:1; }
+    100%{ opacity:0; }
+  }
+
+  #app{
+    transition: transform 0.4s ease-out;
+  }
+  #app.punch{
+    animation: cameraPunch 0.45s ease-out;
+  }
+  @keyframes cameraPunch{
+    0%{ transform:scale(1); }
+    28%{ transform:scale(1.028); }
+    100%{ transform:scale(1); }
   }
 
   #bgCanvas{
@@ -222,6 +249,25 @@
     0%{ opacity:0.5; transform:scale(2); }
     100%{ opacity:0; transform:scale(20); }
   }
+  #zoomStreaks{
+    position:absolute;
+    width:900px;
+    height:900px;
+    border-radius:50%;
+    background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.55) 0deg 1.2deg, transparent 1.2deg 13deg);
+    opacity:0;
+    transform:scale(0.15);
+    pointer-events:none;
+    mix-blend-mode:screen;
+  }
+  #heroLilyWrap.zooming #zoomStreaks{
+    animation: streaksBurst 0.95s cubic-bezier(.2,.6,.3,1) forwards;
+  }
+  @keyframes streaksBurst{
+    0%{   opacity:0;    transform:scale(0.1) rotate(0deg); }
+    28%{  opacity:0.6; }
+    100%{ opacity:0;    transform:scale(1) rotate(40deg); }
+  }
 
   /* ---------- Glass card base ---------- */
   .glass-card{
@@ -235,6 +281,9 @@
       inset 0 1px 0 rgba(255,255,255,0.14),
       inset 0 0 80px rgba(160,107,255,0.05);
     position:relative;
+    transform: perspective(900px) rotateX(var(--tiltY,0deg)) rotateY(var(--tiltX,0deg));
+    transition: transform 0.4s cubic-bezier(.2,.8,.3,1);
+    will-change: transform;
   }
   .glass-card::before{
     content:'';
@@ -247,6 +296,38 @@
     -webkit-mask-composite:xor;
     mask-composite:exclude;
     pointer-events:none;
+  }
+
+  /* tap ripple for tactile phone feedback */
+  .tap-ripple{
+    position:absolute;
+    border-radius:50%;
+    background:rgba(255,255,255,0.35);
+    transform:scale(0);
+    pointer-events:none;
+    animation: rippleOut 0.6s ease-out forwards;
+  }
+  @keyframes rippleOut{
+    0%{ transform:scale(0); opacity:0.6; }
+    100%{ transform:scale(1); opacity:0; }
+  }
+
+  /* cinematic flash used on unlock */
+  #cineFlash{
+    position:fixed;
+    inset:0;
+    z-index:40;
+    background:radial-gradient(circle at 50% 50%, rgba(255,255,255,0.9), rgba(255,95,158,0.3) 40%, transparent 70%);
+    opacity:0;
+    pointer-events:none;
+  }
+  #cineFlash.flash{
+    animation: cineFlashPulse 0.6s ease-out forwards;
+  }
+  @keyframes cineFlashPulse{
+    0%{ opacity:0; }
+    18%{ opacity:0.85; }
+    100%{ opacity:0; }
   }
 
   /* ---------- Screens (state controlled purely via JS Web Animations) ---------- */
@@ -285,6 +366,8 @@
     font-weight:600;
   }
   #startBtn{
+    position:relative;
+    overflow:hidden;
     font-family:'Great Vibes', cursive;
     font-size:52px;
     color:var(--warm);
@@ -296,6 +379,21 @@
     letter-spacing:1px;
     transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
     animation: pulseGlow 2.6s ease-in-out infinite;
+  }
+  #startBtn::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(100deg, transparent 35%, rgba(255,255,255,0.55) 50%, transparent 65%);
+    background-size:250% 100%;
+    background-position:150% 0;
+    animation: btnSheen 3.6s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes btnSheen{
+    0%{ background-position:150% 0; }
+    35%{ background-position:-50% 0; }
+    100%{ background-position:-50% 0; }
   }
   #startBtn:hover{
     transform:scale(1.06);
@@ -448,6 +546,29 @@
     width:100%;
     position:relative;
   }
+  #headlineBlock::before{
+    content:'';
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:340px;
+    height:340px;
+    transform:translate(-50%,-50%) rotate(0deg);
+    background:conic-gradient(from 0deg,
+      transparent 0deg, rgba(255,95,158,0.10) 8deg, transparent 20deg,
+      transparent 60deg, rgba(160,107,255,0.08) 68deg, transparent 80deg,
+      transparent 140deg, rgba(255,45,85,0.09) 148deg, transparent 160deg,
+      transparent 220deg, rgba(255,95,158,0.08) 228deg, transparent 240deg,
+      transparent 300deg, rgba(160,107,255,0.07) 308deg, transparent 320deg,
+      transparent 360deg);
+    animation: raysSpin 26s linear infinite;
+    pointer-events:none;
+    z-index:-1;
+  }
+  @keyframes raysSpin{
+    from{ transform:translate(-50%,-50%) rotate(0deg); }
+    to{ transform:translate(-50%,-50%) rotate(360deg); }
+  }
   #headline{
     font-family:'Kaushan Script', cursive;
     font-weight:400;
@@ -527,6 +648,7 @@
   #divider.show{ width:55%; }
 
   #message{
+    position:relative;
     font-size:16.5px;
     line-height:1.85;
     color:rgba(251,238,252,0.92);
@@ -540,6 +662,256 @@
     transition: opacity 1.3s cubic-bezier(.4,0,.2,1), filter 1.3s cubic-bezier(.4,0,.2,1), transform 1.3s cubic-bezier(.4,0,.2,1);
   }
   #message.show{ opacity:1; filter:blur(0); transform:scale(1); }
+  #message::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.16) 50%, transparent 70%);
+    background-size:250% 100%;
+    background-position:150% 0;
+    pointer-events:none;
+    opacity:0;
+    mix-blend-mode:overlay;
+  }
+  #message.show::after{
+    animation: messageSweep 1.9s ease-out 0.5s forwards;
+  }
+  @keyframes messageSweep{
+    0%{   opacity:0; background-position:150% 0; }
+    18%{  opacity:1; }
+    82%{  opacity:1; }
+    100%{ opacity:0; background-position:-50% 0; }
+  }
+
+  /* ---------- Make a wish: candle ---------- */
+  .wish-section{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    margin-top:36px;
+    padding-top:30px;
+    border-top:1px solid rgba(255,255,255,0.08);
+    width:100%;
+    opacity:0;
+    transform:translateY(14px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  .wish-section.show{ opacity:1; transform:translateY(0); }
+  .wish-prompt{
+    font-family:'Kaushan Script', cursive;
+    font-size:26px;
+    color:var(--warm);
+    opacity:0.92;
+    text-shadow:0 0 18px rgba(255,95,158,0.25);
+  }
+  .candle{
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:26px 30px 4px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    position:relative;
+  }
+  /* ambient light the flame casts on the card behind it */
+  .candle-glow{
+    position:absolute;
+    top:6px;
+    left:50%;
+    width:130px;
+    height:130px;
+    transform:translateX(-50%);
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,181,69,0.28), rgba(255,95,158,0.14) 45%, transparent 72%);
+    filter:blur(4px);
+    pointer-events:none;
+    animation: glowFlicker 2.2s ease-in-out infinite;
+    transition: opacity 0.5s ease;
+  }
+  .candle-glow.out{ opacity:0; }
+  @keyframes glowFlicker{
+    0%,100%{ opacity:0.85; transform:translateX(-50%) scale(1); }
+    25%{ opacity:1;        transform:translateX(-50%) scale(1.06); }
+    50%{ opacity:0.7;      transform:translateX(-50%) scale(0.96); }
+    75%{ opacity:0.95;     transform:translateX(-50%) scale(1.03); }
+  }
+  .candle-body{
+    width:18px;
+    height:50px;
+    border-radius:3px;
+    background:linear-gradient(180deg, #fff2f6, #ffb9cf 55%, #ff9dc1);
+    box-shadow:
+      inset -3px 0 5px rgba(0,0,0,0.18),
+      inset 2px 0 3px rgba(255,255,255,0.4),
+      0 4px 14px rgba(255,95,158,0.25);
+    position:relative;
+  }
+  .candle-body::before{
+    /* wick */
+    content:'';
+    position:absolute;
+    left:50%;
+    top:-4px;
+    transform:translateX(-50%);
+    width:3px;
+    height:9px;
+    background:#3a2a2a;
+    border-radius:2px;
+  }
+  .candle-body::after{
+    /* a little wax drip for realism */
+    content:'';
+    position:absolute;
+    top:8px;
+    right:-2px;
+    width:5px;
+    height:13px;
+    border-radius:0 0 50% 50% / 0 0 60% 60%;
+    background:linear-gradient(180deg, #fff2f6, #ffb9cf);
+    box-shadow:inset -1px 0 2px rgba(0,0,0,0.12);
+  }
+  .flame-stack{
+    position:relative;
+    width:16px;
+    height:26px;
+    margin-bottom:-4px;
+  }
+  .flame{
+    position:absolute;
+    left:50%;
+    bottom:0;
+    width:15px;
+    height:25px;
+    transform:translateX(-50%);
+    border-radius:50% 50% 50% 50% / 65% 65% 35% 35%;
+    background:radial-gradient(circle at 50% 72%, #fff8e0 0%, #ffd27a 30%, #ff8a5c 58%, #ff5f9e 82%, transparent 100%);
+    box-shadow:0 0 18px rgba(255,181,69,0.9), 0 0 36px rgba(255,95,158,0.55);
+    transform-origin:50% 100%;
+    animation: flicker 2.2s ease-in-out infinite;
+    transition: opacity 0.4s ease, transform 0.5s ease;
+  }
+  .flame-core{
+    position:absolute;
+    left:50%;
+    bottom:2px;
+    width:6px;
+    height:11px;
+    transform:translateX(-50%);
+    border-radius:50%;
+    background:radial-gradient(circle, #ffffff 0%, #cfe8ff 45%, rgba(140,190,255,0.5) 75%, transparent 100%);
+    animation: flickerCore 1.7s ease-in-out infinite;
+    transition: opacity 0.3s ease;
+  }
+  @keyframes flicker{
+    0%,100%{ transform:translateX(-50%) scale(1) rotate(-2deg); }
+    25%{ transform:translateX(-50%) scale(1.08,0.94) rotate(2deg); }
+    50%{ transform:translateX(-50%) scale(0.95,1.05) rotate(-3deg); }
+    75%{ transform:translateX(-50%) scale(1.05,0.97) rotate(1deg); }
+  }
+  @keyframes flickerCore{
+    0%,100%{ transform:translateX(-50%) scale(1) rotate(1deg); opacity:0.95; }
+    50%{ transform:translateX(-50%) scale(0.88,1.1) rotate(-2deg); opacity:0.8; }
+  }
+  .flame.out, .flame-core.out{
+    opacity:0;
+    transform:translateX(-50%) scale(0.2) translateY(6px);
+  }
+  .ember{
+    position:absolute;
+    bottom:20px;
+    left:50%;
+    width:3px;
+    height:3px;
+    border-radius:50%;
+    background:#ffb545;
+    box-shadow:0 0 6px rgba(255,181,69,0.9);
+    pointer-events:none;
+  }
+  .wish-hint{
+    font-size:12.5px;
+    color:rgba(251,238,252,0.5);
+    margin-top:4px;
+  }
+  .wish-final{
+    font-size:15px;
+    line-height:1.7;
+    color:rgba(251,238,252,0.9);
+    text-align:center;
+    margin-top:10px;
+    opacity:0;
+    max-height:0;
+    overflow:hidden;
+    transition: opacity 1s ease, max-height 1s ease, margin 1s ease;
+  }
+  .wish-final.show{
+    opacity:1;
+    max-height:120px;
+    margin-top:14px;
+  }
+  .smoke{
+    position:absolute;
+    top:-6px;
+    left:50%;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.5);
+    pointer-events:none;
+  }
+
+  /* ---------- Secret heart easter egg ---------- */
+  #secretHeart{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    z-index:25;
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.06);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    font-size:17px;
+    color:var(--pink);
+    cursor:pointer;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.6s ease, transform 0.2s ease;
+    animation: heartPulse 2.4s ease-in-out infinite;
+  }
+  #secretHeart.show{ opacity:0.85; pointer-events:auto; }
+  #secretHeart:active{ transform:scale(0.9); }
+  @keyframes heartPulse{
+    0%,100%{ box-shadow:0 0 0 rgba(255,95,158,0.35); }
+    50%{ box-shadow:0 0 16px rgba(255,95,158,0.55); }
+  }
+  #secretNote{
+    position:fixed;
+    bottom:70px;
+    right:20px;
+    z-index:25;
+    max-width:min(78vw, 260px);
+    background:rgba(20,10,20,0.9);
+    border:1px solid rgba(255,255,255,0.16);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border-radius:16px 16px 4px 16px;
+    padding:12px 14px;
+    font-size:13px;
+    line-height:1.5;
+    color:var(--warm);
+    opacity:0;
+    transform:translateY(8px) scale(0.96);
+    pointer-events:none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  #secretNote.show{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
 
   /* confetti burst */
   .burst-piece{
@@ -551,6 +923,22 @@
     border-radius:50%;
     pointer-events:none;
     z-index:20;
+  }
+  .burst-petal{
+    width:7px;
+    height:14px;
+    border-radius:70% 0 70% 0;
+  }
+
+  /* grand finale: full-viewport falling petal shower */
+  .falling-petal{
+    position:fixed;
+    top:-24px;
+    width:9px;
+    height:17px;
+    border-radius:70% 0 70% 0;
+    pointer-events:none;
+    z-index:18;
   }
 
   @media (max-width:480px){
@@ -566,8 +954,10 @@
 </head>
 <body>
 
+<div id="curtain"></div>
 <canvas id="bgCanvas"></canvas>
 <div id="spotlight"></div>
+<div id="cineFlash"></div>
 
 <svg width="0" height="0" style="position:absolute">
   <defs>
@@ -605,6 +995,7 @@
 <!-- Hero lily: used for the big cinematic bloom / zoom-through moments -->
 <div id="heroLilyWrap" aria-hidden="true">
   <div id="heroLilyBurst"></div>
+  <div id="zoomStreaks"></div>
   <svg id="heroLily" viewBox="0 0 100 100">
     <g class="hero-petals">
       <g class="petal-slot" transform="rotate(0 50 50)"><path class="hpetal" style="--i:0" d="M50,50 C43,32 38,15 50,2 C62,15 57,32 50,50 Z"/></g>
@@ -631,9 +1022,9 @@
   <!-- SCREEN 1: START -->
   <div class="screen" id="screen-start">
     <div class="glass-card card">
-      <div class="pre-title">A little something for you</div>
+      <div class="pre-title" id="preTitle">A little something for you</div>
       <button id="startBtn">Begin</button>
-      <div class="sub-hint">tap to open</div>
+      <div class="sub-hint" id="subHint">tap to open</div>
     </div>
   </div>
 
@@ -662,11 +1053,29 @@
         <div id="headline"></div>
       </div>
       <div id="divider"></div>
-      <div id="message">Happy birthday to my beautifully cute girl, Angelina 🥹❤️. I’m genuinely so grateful to have you in my life, and I hope you know how much you mean to me. You make me happy in ways you probably don’t even realize, and even through all our jokes, random conversations, teasing, and little moments together, you’ve become someone I care about so deeply. I love your personality and all the little things that make you uniquely you. You’re not just my girlfriend—you’re my favorite person, my comfort, and someone I always want by my side. I hope this new year of your life brings you nothing but happiness, peace, love, and everything your heart desires, because you truly deserve the world. I’m so proud of the woman you are, and I can’t wait to make even more memories with you. Happy birthday, my love. I love you so much, Angelinka, and I hope today makes you feel as special and appreciated as you make me feel every day ❤️🎂</div>
+      <div id="message">Happy birthday to my beautifully cute girl, Angelina 🥹❤️. I’m genuinely so grateful to have you in my life, and I hope you know how much you mean to me. You make me happy in ways you probably don’t even realize, and even through all our jokes, random conversations, teasing, and little moments together, you’ve become someone I care about so deeply. I love your personality and all the little things that make you uniquely you. You’re not just my girlfriend—you’re my favorite person, my comfort, and someone I always want by my side. I hope this new year of your life brings you nothing but happiness, peace, love, and everything your heart desires, because you truly deserve the world. I’m so proud of the woman you are, and I can’t wait to make even more memories with you. Happy birthday, my love. I love you so much, Angelina, and I hope today makes you feel as special and appreciated as you make me feel every day ❤️🎂</div>
+
+      <div id="wishSection" class="wish-section">
+        <div class="wish-prompt">Make a wish 🕯️</div>
+        <button class="candle" id="candleBtn" aria-label="Blow out the candle">
+          <span class="candle-glow" id="candleGlow"></span>
+          <span class="flame-stack">
+            <span class="flame" id="flame"></span>
+            <span class="flame-core" id="flameCore"></span>
+          </span>
+          <span class="candle-body"></span>
+        </button>
+        <div class="wish-hint" id="wishHint">tap the flame to make a wish</div>
+        <div class="wish-final" id="wishFinal">Whatever you wished for, I hope it's already on its way.<br>I love you, Angelina. 🤍</div>
+      </div>
     </div>
   </div>
 
 </div>
+
+<!-- Secret tappable heart — a little something to come back to -->
+<button id="secretHeart" aria-label="A little something">🤍</button>
+<div id="secretNote"></div>
 
 <!-- Hidden YouTube audio player: kept full-size but placed off-screen
      (a 1x1 / opacity:0 iframe is unreliable for playback) -->
@@ -675,6 +1084,15 @@
 </div>
 
 <script>
+/* Dev/testing convenience: open the page with ?reset in the URL to wipe
+   the "already unlocked" memory and always see the full first-time flow. */
+try{
+  if(location.search.includes('reset')){
+    localStorage.removeItem('bday_unlocked');
+    history.replaceState(null, '', location.pathname);
+  }
+}catch(e){}
+
 /* =========================================================
    Immersive black canvas background: drifting colorful
    bokeh glow + smooth twinkling dust particles
@@ -703,8 +1121,11 @@ const palette = [
   {r:255, g:110, b:60},   // warm red-coral
 ];
 
+const isSmallScreen = Math.min(window.innerWidth, window.innerHeight) < 700;
+const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 const bokeh = [];
-const BOKEH_COUNT = 7;
+const BOKEH_COUNT = prefersReducedMotion ? 3 : (isSmallScreen ? 5 : 7);
 for(let i=0;i<BOKEH_COUNT;i++){
   const c = palette[i % palette.length];
   bokeh.push({
@@ -721,7 +1142,7 @@ for(let i=0;i<BOKEH_COUNT;i++){
 }
 
 const dust = [];
-const DUST_COUNT = 90;
+const DUST_COUNT = prefersReducedMotion ? 18 : (isSmallScreen ? 45 : 90);
 for(let i=0;i<DUST_COUNT;i++){
   const c = palette[Math.floor(Math.random()*palette.length)];
   dust.push({
@@ -786,16 +1207,176 @@ function drawFrame(now){
     ctx.fill();
   });
 
+  // touch/tap ripples — the background physically reacts to her
+  for(let i=ripples.length-1; i>=0; i--){
+    const rp = ripples[i];
+    const age = (now - rp.born)/1000;
+    if(age > 1.15){ ripples.splice(i,1); continue; }
+    const progress = age/1.15;
+    const radius = 18 + progress*180;
+    const alpha = 0.5 * (1-progress);
+    ctx.strokeStyle = `rgba(${rp.color.r},${rp.color.g},${rp.color.b},${alpha})`;
+    ctx.lineWidth = 2.5 * (1-progress) + 0.5;
+    ctx.beginPath();
+    ctx.arc(rp.x, rp.y, radius, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
   ctx.globalCompositeOperation = 'source-over';
   requestAnimationFrame(drawFrame);
 }
 requestAnimationFrame(drawFrame);
 
-/* ---------------- Cursor spotlight ---------------- */
+const ripples = [];
+function spawnRipple(x, y){
+  const c = palette[Math.floor(Math.random()*palette.length)];
+  ripples.push({ x, y, born: performance.now(), color:c });
+}
+window.addEventListener('pointerdown', (e)=> spawnRipple(e.clientX, e.clientY));
+
+/* ---------------- Cursor / touch spotlight + card tilt ---------------- */
 const spotlight = document.getElementById('spotlight');
-window.addEventListener('pointermove', (e)=>{
-  spotlight.style.setProperty('--x', e.clientX + 'px');
-  spotlight.style.setProperty('--y', e.clientY + 'px');
+
+function updateTilt(clientX, clientY){
+  spotlight.style.setProperty('--x', clientX + 'px');
+  spotlight.style.setProperty('--y', clientY + 'px');
+  if(prefersReducedMotion) return;
+
+  const activeCard = document.querySelector('.screen:not(.hidden) .glass-card');
+  if(activeCard){
+    const rect = activeCard.getBoundingClientRect();
+    const px = (clientX - rect.left) / rect.width;
+    const py = (clientY - rect.top) / rect.height;
+    const tiltX = (px - 0.5) * 10;
+    const tiltY = (0.5 - py) * 10;
+    activeCard.style.setProperty('--tiltX', tiltX.toFixed(2) + 'deg');
+    activeCard.style.setProperty('--tiltY', tiltY.toFixed(2) + 'deg');
+  }
+}
+function resetTilt(){
+  const activeCard = document.querySelector('.screen:not(.hidden) .glass-card');
+  if(activeCard){
+    activeCard.style.setProperty('--tiltX', '0deg');
+    activeCard.style.setProperty('--tiltY', '0deg');
+  }
+}
+
+window.addEventListener('pointermove', (e)=> updateTilt(e.clientX, e.clientY));
+window.addEventListener('touchmove', (e)=>{
+  if(e.touches && e.touches.length){
+    updateTilt(e.touches[0].clientX, e.touches[0].clientY);
+  }
+}, { passive:true });
+window.addEventListener('touchend', resetTilt, { passive:true });
+
+// gentle ambient tilt from the phone's gyroscope when she's just holding it
+let gyroEnabled = false;
+function enableGyroTilt(){
+  if(gyroEnabled) return;
+  gyroEnabled = true;
+  window.addEventListener('deviceorientation', (e)=>{
+    if(e.beta === null || e.gamma === null) return;
+    const activeCard = document.querySelector('.screen:not(.hidden) .glass-card');
+    if(!activeCard) return;
+    const tiltX = Math.max(-8, Math.min(8, (e.gamma || 0) * 0.35));
+    const tiltY = Math.max(-8, Math.min(8, ((e.beta || 0) - 45) * 0.2));
+    activeCard.style.setProperty('--tiltX', tiltX.toFixed(2) + 'deg');
+    activeCard.style.setProperty('--tiltY', tiltY.toFixed(2) + 'deg');
+  });
+}
+function requestGyroPermission(){
+  if(prefersReducedMotion) return;
+  if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'){
+    DeviceOrientationEvent.requestPermission().then(state=>{
+      if(state === 'granted') enableGyroTilt();
+    }).catch(()=>{});
+  } else {
+    enableGyroTilt();
+  }
+}
+
+/* ---------------- Haptics + tap ripple, for a tactile phone feel ---------------- */
+function buzz(pattern){
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
+}
+
+/* ---------------- Sound design — synthesized live, no audio files ---------------- */
+let sfxCtx = null;
+function getSfxCtx(){
+  try{
+    if(!sfxCtx){
+      sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(sfxCtx.state === 'suspended') sfxCtx.resume();
+    return sfxCtx;
+  }catch(e){ return null; }
+}
+function playChime(freqs, opts={}){
+  const ctx = getSfxCtx();
+  if(!ctx) return;
+  const now = ctx.currentTime;
+  const dur = opts.dur || 1.1;
+  const vol = opts.vol || 0.1;
+  const stagger = opts.stagger || 0.08;
+  freqs.forEach((f, i)=>{
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = f;
+    const start = now + i*stagger;
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.linearRampToValueAtTime(vol, start + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(start);
+    osc.stop(start + dur + 0.1);
+  });
+}
+function playBloomChime(){
+  playChime([523.25, 659.25, 783.99, 987.77], { dur:1.3, vol:0.08, stagger:0.09 });
+}
+function playUnlockChime(){
+  playChime([392.0, 523.25, 659.25, 783.99, 1046.5], { dur:1.7, vol:0.1, stagger:0.075 });
+}
+function playWhoosh(dur=0.6, vol=0.14){
+  const ctx = getSfxCtx();
+  if(!ctx) return;
+  const bufferSize = Math.floor(ctx.sampleRate * dur);
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * (1 - i/bufferSize); }
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.Q.value = 0.7;
+  filter.frequency.setValueAtTime(500, ctx.currentTime);
+  filter.frequency.exponentialRampToValueAtTime(2200, ctx.currentTime + dur*0.8);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(vol, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
+  noise.connect(filter).connect(gain).connect(ctx.destination);
+  noise.start();
+}
+
+function addRipple(el, x, y){
+  const rect = el.getBoundingClientRect();
+  const ripple = document.createElement('span');
+  ripple.className = 'tap-ripple';
+  const size = Math.max(rect.width, rect.height) * 1.4;
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = (x - rect.left - size/2) + 'px';
+  ripple.style.top = (y - rect.top - size/2) + 'px';
+  el.appendChild(ripple);
+  setTimeout(()=> ripple.remove(), 650);
+}
+document.querySelectorAll('#startBtn, .unlock-btn').forEach(btn=>{
+  btn.style.position = btn.style.position || 'relative';
+  btn.style.overflow = 'hidden';
+  btn.addEventListener('pointerdown', (e)=>{
+    addRipple(btn, e.clientX, e.clientY);
+    buzz(12);
+  });
 });
 
 /* =========================================================
@@ -833,8 +1414,18 @@ function transitionTo(hideEl, showEl, onMidpoint){
 /* ---------------- Screen 1 -> 2 ---------------- */
 const startBtn = document.getElementById('startBtn');
 
+try{
+  if(localStorage.getItem('bday_unlocked') === '1'){
+    document.getElementById('preTitle').textContent = 'Welcome back';
+    document.getElementById('subHint').textContent = 'tap to read it again';
+  }
+}catch(e){}
+
 startBtn.addEventListener('click', ()=>{
   startMusic();
+  getSfxCtx();
+  requestGyroPermission();
+  buzz(20);
   startBtn.style.pointerEvents = 'none';
   screenStart.style.pointerEvents = 'none';
 
@@ -850,13 +1441,32 @@ startBtn.addEventListener('click', ()=>{
     playLily({
       zoomOut:false,
       holdMs:350,
+      onBloomed:()=>{
+        const flash = document.getElementById('cineFlash');
+        flash.classList.remove('flash');
+        void flash.offsetWidth;
+        flash.classList.add('flash');
+        playBloomChime();
+      },
       onDone:()=>{
-        screenLock.classList.remove('hidden');
-        screenLock.animate([
-          { transform:'scale(0.92)', opacity:0 },
-          { transform:'scale(1)',   opacity:1 }
-        ], { duration:500, easing:'cubic-bezier(.16,1,.3,1)', fill:'forwards' });
-        setTimeout(()=> hiddenInput.focus(), 300);
+        let alreadyUnlocked = false;
+        try{ alreadyUnlocked = localStorage.getItem('bday_unlocked') === '1'; }catch(e){}
+
+        if(alreadyUnlocked){
+          screenReveal.classList.remove('hidden');
+          screenReveal.animate([
+            { transform:'scale(0.9)', opacity:0 },
+            { transform:'scale(1)',   opacity:1 }
+          ], { duration:500, easing:'cubic-bezier(.16,1,.3,1)', fill:'forwards' });
+          setTimeout(typeHeadline, 200);
+        } else {
+          screenLock.classList.remove('hidden');
+          screenLock.animate([
+            { transform:'scale(0.92)', opacity:0 },
+            { transform:'scale(1)',   opacity:1 }
+          ], { duration:500, easing:'cubic-bezier(.16,1,.3,1)', fill:'forwards' });
+          setTimeout(()=> hiddenInput.focus(), 300);
+        }
       }
     });
   }, 350);
@@ -882,35 +1492,57 @@ document.querySelectorAll('#heroLily .hpetal').forEach(el=>{
  * onDone fires once the whole sequence (incl. zoom, if any) is finished.
  */
 function playLily({ zoomOut = false, holdMs = 550, onBloomed, onDone } = {}){
-  heroLilyWrap.classList.remove('blooming','zooming','breathing');
-  void heroLilyWrap.offsetWidth; // restart animations
-  heroLilyWrap.classList.add('blooming');
+  let finished = false;
+  const finish = ()=>{
+    if(finished) return;
+    finished = true;
+    if(onDone) onDone();
+  };
+
+  try{
+    heroLilyWrap.classList.remove('blooming','zooming','breathing');
+    void heroLilyWrap.offsetWidth; // restart animations
+    heroLilyWrap.classList.add('blooming');
+  }catch(e){ finish(); return; }
 
   const bloomDuration = 900 + 5*100 + 100; // last petal delay + its own duration + buffer
-  setTimeout(()=>{
-    if(onBloomed) onBloomed();
 
-    if(zoomOut){
-      setTimeout(()=>{
-        heroLilyWrap.classList.add('zooming');
+  // absolute safety net: whatever else happens, never leave her staring at a
+  // stuck screen — force completion if the normal chain takes too long
+  const hardStop = setTimeout(finish, bloomDuration + holdMs + 1600);
+
+  setTimeout(()=>{
+    try{ if(onBloomed) onBloomed(); }catch(e){}
+
+    try{
+      if(zoomOut){
         setTimeout(()=>{
-          heroLilyWrap.classList.remove('blooming','zooming');
-          heroLilyWrap.style.opacity = '0';
-          if(onDone) onDone();
-        }, 950);
-      }, holdMs);
-    } else {
-      heroLilyWrap.classList.add('breathing');
-      setTimeout(()=>{
-        heroLilyWrap.classList.remove('blooming','breathing');
-        heroLilyWrap.style.transition = 'opacity 0.4s ease';
-        heroLilyWrap.style.opacity = '0';
+          try{
+            heroLilyWrap.classList.add('zooming');
+            setTimeout(()=>{
+              heroLilyWrap.classList.remove('blooming','zooming');
+              heroLilyWrap.style.opacity = '0';
+              clearTimeout(hardStop);
+              finish();
+            }, 950);
+          }catch(e){ clearTimeout(hardStop); finish(); }
+        }, holdMs);
+      } else {
+        heroLilyWrap.classList.add('breathing');
         setTimeout(()=>{
-          heroLilyWrap.style.transition = '';
-          if(onDone) onDone();
-        }, 420);
-      }, holdMs);
-    }
+          try{
+            heroLilyWrap.classList.remove('blooming','breathing');
+            heroLilyWrap.style.transition = 'opacity 0.4s ease';
+            heroLilyWrap.style.opacity = '0';
+            setTimeout(()=>{
+              heroLilyWrap.style.transition = '';
+              clearTimeout(hardStop);
+              finish();
+            }, 420);
+          }catch(e){ clearTimeout(hardStop); finish(); }
+        }, holdMs);
+      }
+    }catch(e){ clearTimeout(hardStop); finish(); }
   }, bloomDuration);
 }
 
@@ -941,6 +1573,7 @@ hiddenInput.addEventListener('input', ()=>{
       box.classList.remove('bounce');
       void box.offsetWidth;
       box.classList.add('bounce');
+      buzz(10);
     }
   });
   prevLength = val.length;
@@ -955,8 +1588,11 @@ function checkCode(){
   const val = hiddenInput.value;
   if(val.length < 4) { hiddenInput.focus(); return; }
   if(val === CODE){
+    buzz([15,40,25]);
+    try{ localStorage.setItem('bday_unlocked', '1'); }catch(e){}
     revealSequence();
   } else {
+    buzz([50,40,50]);
     codeBoxes.forEach(box => box.classList.add('error'));
     document.getElementById('codeBoxes').classList.add('shake');
     setTimeout(()=> document.getElementById('codeBoxes').classList.remove('shake'), 450);
@@ -990,7 +1626,16 @@ function revealSequence(){
       zoomOut:true,
       holdMs:600,
       onBloomed:()=>{
-        // right as it finishes opening, like it just caught the sun
+        const flash = document.getElementById('cineFlash');
+        flash.classList.remove('flash');
+        void flash.offsetWidth;
+        flash.classList.add('flash');
+        playUnlockChime();
+        const app = document.getElementById('app');
+        app.classList.remove('punch');
+        void app.offsetWidth;
+        app.classList.add('punch');
+        buzz([12,30,12,30,20]);
       },
       onDone:()=>{
         screenReveal.classList.remove('hidden');
@@ -1045,14 +1690,22 @@ function showMessage(){
   setTimeout(()=>{
     launchConfetti();
   }, 300);
+  setTimeout(()=>{
+    document.getElementById('wishSection').classList.add('show');
+  }, 1600);
+  setTimeout(()=>{
+    document.getElementById('secretHeart').classList.add('show');
+  }, 2400);
 }
 
 /* ---------------- Confetti / heart burst ---------------- */
 function launchConfetti(){
   const colors = ['#ff5f9e','#ff2d55','#e6145a','#ffb545','#fbeefc'];
-  for(let i=0;i<55;i++){
+  const count = prefersReducedMotion ? 22 : 55;
+  for(let i=0;i<count;i++){
     const piece = document.createElement('div');
-    piece.className = 'burst-piece';
+    const isPetal = Math.random() < 0.35;
+    piece.className = 'burst-piece' + (isPetal ? ' burst-petal' : '');
     const color = colors[Math.floor(Math.random()*colors.length)];
     piece.style.background = color;
     piece.style.boxShadow = `0 0 8px ${color}`;
@@ -1141,6 +1794,122 @@ function fadeMusicIn(targetVolume, durationMs){
     if(step >= steps) clearInterval(fade);
   }, stepTime);
 }
+
+/* =========================================================
+   Make a wish: blow out the candle by tapping the flame
+   ========================================================= */
+let candleLit = true;
+let emberTimer = null;
+
+function spawnEmber(){
+  if(!candleLit) return;
+  const candle = document.getElementById('candleBtn');
+  const ember = document.createElement('span');
+  ember.className = 'ember';
+  candle.appendChild(ember);
+  const dx = (Math.random()-0.5)*22;
+  const dur = 1300 + Math.random()*700;
+  ember.animate([
+    { transform:'translate(-50%,0) scale(1)', opacity:0.9 },
+    { transform:`translate(calc(-50% + ${dx}px), -60px) scale(0.3)`, opacity:0 }
+  ], { duration:dur, easing:'ease-out', fill:'forwards' });
+  setTimeout(()=> ember.remove(), dur+50);
+}
+emberTimer = setInterval(()=>{
+  const wishVisible = document.getElementById('wishSection').classList.contains('show');
+  if(candleLit && wishVisible && Math.random() < 0.6) spawnEmber();
+}, 900);
+
+function blowOutCandle(){
+  if(!candleLit) return;
+  candleLit = false;
+  clearInterval(emberTimer);
+
+  const flame = document.getElementById('flame');
+  const flameCore = document.getElementById('flameCore');
+  const glow = document.getElementById('candleGlow');
+  flame.classList.add('out');
+  flameCore.classList.add('out');
+  glow.classList.add('out');
+  buzz([10,30,10]);
+  playWhoosh(0.5, 0.12);
+
+  // a little puff of smoke curling up from the wick
+  const candle = document.getElementById('candleBtn');
+  for(let i=0;i<5;i++){
+    const puff = document.createElement('span');
+    puff.className = 'smoke';
+    candle.appendChild(puff);
+    const dx = (Math.random()-0.5)*30;
+    puff.animate([
+      { transform:'translate(-50%,0) scale(0.6)', opacity:0.6 },
+      { transform:`translate(calc(-50% + ${dx}px), -46px) scale(1.8)`, opacity:0 }
+    ], { duration:1400 + Math.random()*400, delay:i*90, easing:'ease-out', fill:'forwards' });
+    setTimeout(()=> puff.remove(), 2000);
+  }
+
+  setTimeout(()=>{
+    document.getElementById('wishFinal').classList.add('show');
+    document.getElementById('wishHint').style.display = 'none';
+    launchConfetti();
+    petalShower();
+  }, 700);
+}
+
+/* ---------------- Grand finale: full-viewport falling petal shower ---------------- */
+function petalShower(){
+  const count = prefersReducedMotion ? 14 : 38;
+  const spread = prefersReducedMotion ? 2600 : 4200;
+  const colors = ['#ff5f9e','#ff2d55','#e6145a','#ffb545','#fbeefc'];
+  for(let i=0;i<count;i++){
+    setTimeout(()=>{
+      const p = document.createElement('div');
+      p.className = 'falling-petal';
+      const startX = Math.random()*window.innerWidth;
+      const drift = (Math.random()-0.5)*180;
+      const rot = 180 + Math.random()*360;
+      const dur = 3200 + Math.random()*2000;
+      const color = colors[Math.floor(Math.random()*colors.length)];
+      p.style.left = startX + 'px';
+      p.style.background = color;
+      p.style.boxShadow = `0 0 7px ${color}`;
+      document.body.appendChild(p);
+      p.animate([
+        { transform:'translate(0,0) rotate(0deg)', opacity:0 },
+        { transform:`translate(${drift*0.35}px, 45vh) rotate(${rot}deg)`, opacity:0.9, offset:0.18 },
+        { transform:`translate(${drift}px, 112vh) rotate(${rot*1.6}deg)`, opacity:0 }
+      ], { duration:dur, easing:'ease-in' });
+      setTimeout(()=> p.remove(), dur + 150);
+    }, Math.random()*spread);
+  }
+}
+
+document.getElementById('candleBtn').addEventListener('click', blowOutCandle);
+
+/* =========================================================
+   Secret heart: a little something to come back to
+   ========================================================= */
+const secretNotes = [
+  "You make my favorite kind of ordinary day. 🤍",
+  "I smile like an idiot every time you text me first.",
+  "You're the last thing on my mind before I fall asleep — every night.",
+  "If overthinking about you was a sport, I'd win gold.",
+  "Yes, I saved this whole page. No, I'm not sorry.",
+  "P.S. you're still my favorite notification.",
+  "Counting down the days until there's no distance left between us."
+];
+let secretIndex = 0;
+let secretHideTimer = null;
+
+document.getElementById('secretHeart').addEventListener('click', ()=>{
+  const note = document.getElementById('secretNote');
+  note.textContent = secretNotes[secretIndex % secretNotes.length];
+  secretIndex++;
+  note.classList.add('show');
+  buzz(8);
+  clearTimeout(secretHideTimer);
+  secretHideTimer = setTimeout(()=> note.classList.remove('show'), 4000);
+});
 
 document.addEventListener('touchstart', ()=>{}, {passive:true});
 </script>
